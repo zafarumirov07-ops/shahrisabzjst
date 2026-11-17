@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { SUPABASE_CONFIGURED } from '@/lib/supabase/env';
 
 /**
  * Statistika: post ko'rilishi (postId berilsa) yoki sayt tashrifi (site berilsa).
@@ -9,7 +10,7 @@ import { createClient } from '@/lib/supabase/client';
  */
 export default function ViewTracker({ postId, site }: { postId?: string; site?: string }) {
   useEffect(() => {
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return;
+    if (!SUPABASE_CONFIGURED) return;
     const key = postId ? `viewed:${postId}` : `visited:${site}`;
     try {
       if (sessionStorage.getItem(key)) return;

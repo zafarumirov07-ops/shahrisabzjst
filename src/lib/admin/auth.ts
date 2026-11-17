@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { SUPABASE_CONFIGURED } from '@/lib/supabase/env';
 import { createClient } from '@/lib/supabase/server';
 import type { Site } from '@/lib/site';
 
@@ -27,7 +28,7 @@ export function isStaffRole(role: AppRole): boolean {
 /** Kirmagan foydalanuvchi /admin/login ga yo'naltiriladi. */
 export async function getSessionProfile() {
   // Supabase hali ulanmagan bo'lsa, login sahifasi tushuntirish ko'rsatadi
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+  if (!SUPABASE_CONFIGURED) {
     redirect('/admin/login');
   }
   const supabase = await createClient();

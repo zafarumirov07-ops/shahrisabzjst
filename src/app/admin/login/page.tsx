@@ -2,12 +2,13 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { LogoMark } from '@/components/site/Header';
 import { LoginForm } from '@/components/admin/SmallClient';
+import { SUPABASE_CONFIGURED } from '@/lib/supabase/env';
 import { createClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = { title: 'Kirish' };
 
 export default async function LoginPage() {
-  if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  if (SUPABASE_CONFIGURED) {
     const supabase = await createClient();
     const {
       data: { user },
@@ -23,11 +24,11 @@ export default async function LoginPage() {
           <h1 className="mt-4 text-xl font-bold">Admin panel</h1>
           <p className="mt-1 text-sm text-muted">Abu Ali ibn Sino nomidagi jamoat salomatligi texnikumi</p>
         </div>
-        {process.env.NEXT_PUBLIC_SUPABASE_URL ? (
+        {SUPABASE_CONFIGURED ? (
           <LoginForm />
         ) : (
           <p className="rounded-lg bg-amber-500/10 p-3 text-sm text-amber-700">
-            Supabase sozlanmagan. <code>.env.local</code> faylida NEXT_PUBLIC_SUPABASE_URL va NEXT_PUBLIC_SUPABASE_ANON_KEY ni kiriting.
+            Supabase sozlanmagan. <code>.env.local</code> faylida NEXT_PUBLIC_SUPABASE_URL va NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ni kiriting.
           </p>
         )}
       </div>

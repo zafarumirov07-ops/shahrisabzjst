@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { SUPABASE_KEY, SUPABASE_URL } from './env';
 
 /**
  * Ommaviy sahifalar uchun cookie ishlatmaydigan (anon) klient.
@@ -11,8 +12,8 @@ export const PUBLIC_REVALIDATE_SECONDS = 60;
 
 export function createPublicClient(): SupabaseClient | null {
   if (cached !== undefined) return cached;
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const url = SUPABASE_URL;
+  const key = SUPABASE_KEY;
   if (!url || !key) {
     cached = null;
     return cached;
