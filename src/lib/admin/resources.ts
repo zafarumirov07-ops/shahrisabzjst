@@ -1,0 +1,316 @@
+/**
+ * Admin paneldagi barcha CRUD bo'limlari shu konfiguratsiya orqali quriladi.
+ * Faqat serializatsiya qilinadigan ma'lumotlar (funksiyalarsiz), chunki client komponentlarga uzatiladi.
+ */
+
+export type FieldType =
+  | 'text'
+  | 'textarea'
+  | 'url'
+  | 'number'
+  | 'checkbox'
+  | 'select'
+  | 'datetime'
+  | 'image'
+  | 'i18n'
+  | 'i18n-textarea'
+  | 'i18n-markdown'
+  | 'slug'
+  | 'site'
+  | 'socials';
+
+export type Option = { value: string; label: string };
+
+export type Field = {
+  name: string;
+  label: string;
+  type: FieldType;
+  required?: boolean;
+  help?: string;
+  placeholder?: string;
+  options?: Option[];
+  /** Variantlar boshqa jadvaldan yuklanadi */
+  optionsFrom?: { table: string; labelField: string; i18n?: boolean };
+  /** slug maydoni uchun: qaysi i18n maydondan (o'zbekcha matn) hosil qilinadi */
+  from?: string;
+};
+
+export type ColumnKind = 'i18n' | 'text' | 'date' | 'bool' | 'site' | 'badge' | 'number' | 'poststatus';
+export type Column = { label: string; field: string; kind: ColumnKind };
+
+export type AttachmentKind = 'image' | 'video' | 'file' | 'embed';
+
+export type AttachmentsConfig = {
+  table: 'post_media' | 'album_items';
+  fk: 'post_id' | 'album_id';
+  kinds: AttachmentKind[];
+  textField: 'title' | 'caption';
+  label: string;
+};
+
+export type Resource = {
+  key: string;
+  table: string;
+  plural: string;
+  singular: string;
+  hasSite: boolean;
+  /** Faqat asosiy sayt (talimsifati muharrirlariga ko'rinmaydi) */
+  mainOnly?: boolean;
+  setCreatedBy?: boolean;
+  fields: Field[];
+  defaults: Record<string, unknown>;
+  columns: Column[];
+  orderBy: { column: string; ascending: boolean };
+  attachments?: AttachmentsConfig;
+};
+
+const SITE_FIELD: Field = { name: 'site', label: 'Qaysi saytda', type: 'site', required: true };
+
+export const RESOURCES: Record<string, Resource> = {
+  posts: {
+    key: 'posts',
+    table: 'posts',
+    plural: 'Postlar',
+    singular: 'Post',
+    hasSite: true,
+    setCreatedBy: true,
+    fields: [
+      SITE_FIELD,
+      {
+        name: 'kind',
+        label: 'Turi',
+        type: 'select',
+        required: true,
+        options: [
+          { value: 'news', label: 'Yangilik' },
+          { value: 'announcement', label: "E'lon" },
+        ],
+      },
+      { name: 'title', label: 'Sarlavha', type: 'i18n', required: true },
+      { name: 'slug', label: 'Havola (slug)', type: 'slug', from: 'title', help: 'Bo‘sh qoldirsangiz sarlavhadan avtomatik yaratiladi' },
+      { name: 'excerpt', label: 'Qisqacha mazmun', type: 'i18n-textarea', help: "Ro'yxatlarda va ijtimoiy tarmoqlarda ko'rinadi" },
+      { name: 'body', label: 'Asosiy matn (Markdown)', type: 'i18n-markdown' },
+      { name: 'cover_url', label: 'Muqova rasmi', type: 'image' },
+      { name: 'pinned', label: 'Muhim (ro‘yxat boshida turadi)', type: 'checkbox' },
+      {
+        name: 'status',
+        label: 'Holati',
+        type: 'select',
+        required: true,
+        options: [
+          { value: 'draft', label: 'Qoralama (saytda ko‘rinmaydi)' },
+          { value: 'published', label: "E'lon qilish" },
+        ],
+      },
+      {
+        name: 'published_at',
+        label: "E'lon qilish vaqti",
+        type: 'datetime',
+        help: "Kelajakdagi vaqt qo'ysangiz, post o'sha vaqtda saytda avtomatik paydo bo'ladi. Bo'sh bo'lsa — hozir.",
+      },
+    ],
+    defaults: { kind: 'news', status: 'draft', pinned: false },
+    columns: [
+      { label: 'Sarlavha', field: 'title', kind: 'i18n' },
+      { label: 'Turi', field: 'kind', kind: 'badge' },
+      { label: 'Sayt', field: 'site', kind: 'site' },
+      { label: 'Holati', field: 'status', kind: 'poststatus' },
+      { label: 'Sana', field: 'published_at', kind: 'date' },
+      { label: "Ko'rilgan", field: 'view_count', kind: 'number' },
+    ],
+    orderBy: { column: 'created_at', ascending: false },
+    attachments: {
+      table: 'post_media',
+      fk: 'post_id',
+      kinds: ['image', 'video', 'file', 'embed'],
+      textField: 'title',
+      label: 'Rasmlar, videolar va fayllar',
+    },
+  },
+
+  events: {
+    key: 'events',
+    table: 'events',
+    plural: 'Tadbirlar',
+    singular: 'Tadbir',
+    hasSite: true,
+    fields: [
+      SITE_FIELD,
+      { name: 'title', label: 'Nomi', type: 'i18n', required: true },
+      { name: 'description', label: 'Tavsif', type: 'i18n-textarea' },
+      { name: 'location', label: 'Manzil / joy', type: 'i18n' },
+      { name: 'starts_at', label: 'Boshlanish vaqti', type: 'datetime', required: true },
+      { name: 'ends_at', label: 'Tugash vaqti', type: 'datetime' },
+      { name: 'cover_url', label: 'Rasm', type: 'image' },
+      { name: 'published', label: "Saytda ko'rsatilsin", type: 'checkbox' },
+    ],
+    defaults: { published: true },
+    columns: [
+      { label: 'Nomi', field: 'title', kind: 'i18n' },
+      { label: 'Sayt', field: 'site', kind: 'site' },
+      { label: 'Sana', field: 'starts_at', kind: 'date' },
+      { label: "Ko'rinadi", field: 'published', kind: 'bool' },
+    ],
+    orderBy: { column: 'starts_at', ascending: false },
+  },
+
+  albums: {
+    key: 'albums',
+    table: 'albums',
+    plural: 'Galereya (albomlar)',
+    singular: 'Albom',
+    hasSite: true,
+    fields: [
+      SITE_FIELD,
+      { name: 'title', label: 'Albom nomi', type: 'i18n', required: true },
+      { name: 'slug', label: 'Havola (slug)', type: 'slug', from: 'title' },
+      { name: 'description', label: 'Tavsif', type: 'i18n-textarea' },
+      { name: 'cover_url', label: 'Muqova rasmi', type: 'image' },
+      { name: 'published', label: "Saytda ko'rsatilsin", type: 'checkbox' },
+      { name: 'published_at', label: 'Sana', type: 'datetime' },
+    ],
+    defaults: { published: true },
+    columns: [
+      { label: 'Nomi', field: 'title', kind: 'i18n' },
+      { label: 'Sayt', field: 'site', kind: 'site' },
+      { label: 'Sana', field: 'published_at', kind: 'date' },
+      { label: "Ko'rinadi", field: 'published', kind: 'bool' },
+    ],
+    orderBy: { column: 'published_at', ascending: false },
+    attachments: {
+      table: 'album_items',
+      fk: 'album_id',
+      kinds: ['image', 'video', 'embed'],
+      textField: 'caption',
+      label: 'Albom rasmlari va videolari',
+    },
+  },
+
+  staff: {
+    key: 'staff',
+    table: 'staff',
+    plural: 'Jamoa',
+    singular: 'Xodim',
+    hasSite: true,
+    fields: [
+      SITE_FIELD,
+      { name: 'full_name', label: 'F.I.Sh.', type: 'text', required: true },
+      {
+        name: 'group_key',
+        label: 'Guruh',
+        type: 'select',
+        required: true,
+        options: [
+          { value: 'leadership', label: 'Rahbariyat' },
+          { value: 'responsible', label: "Mas'ullar" },
+          { value: 'teacher', label: "O'qituvchilar" },
+          { value: 'staff', label: 'Xodimlar' },
+        ],
+      },
+      {
+        name: 'department_id',
+        label: "Bo'lim / kafedra",
+        type: 'select',
+        optionsFrom: { table: 'departments', labelField: 'name', i18n: true },
+      },
+      { name: 'position', label: 'Lavozimi', type: 'i18n' },
+      { name: 'bio', label: "Qisqacha ma'lumot", type: 'i18n-textarea' },
+      { name: 'photo_url', label: 'Rasmi', type: 'image' },
+      { name: 'phone', label: 'Telefon', type: 'text' },
+      { name: 'email', label: 'Elektron pochta', type: 'text' },
+      { name: 'socials', label: 'Ijtimoiy tarmoqlar', type: 'socials' },
+      { name: 'sort_order', label: 'Tartib raqami (kichigi birinchi)', type: 'number' },
+      { name: 'published', label: "Saytda ko'rsatilsin", type: 'checkbox' },
+    ],
+    defaults: { group_key: 'teacher', published: true, sort_order: 0, socials: {} },
+    columns: [
+      { label: 'F.I.Sh.', field: 'full_name', kind: 'text' },
+      { label: 'Guruh', field: 'group_key', kind: 'badge' },
+      { label: 'Sayt', field: 'site', kind: 'site' },
+      { label: 'Tartib', field: 'sort_order', kind: 'number' },
+      { label: "Ko'rinadi", field: 'published', kind: 'bool' },
+    ],
+    orderBy: { column: 'sort_order', ascending: true },
+  },
+
+  programs: {
+    key: 'programs',
+    table: 'programs',
+    plural: "Qabul yo'nalishlari",
+    singular: "Yo'nalish",
+    hasSite: false,
+    mainOnly: true,
+    fields: [
+      { name: 'name', label: 'Yo‘nalish nomi', type: 'i18n', required: true },
+      { name: 'slug', label: 'Havola (slug)', type: 'slug', from: 'name' },
+      { name: 'description', label: 'Tavsif', type: 'i18n-textarea' },
+      { name: 'duration', label: "Ta'lim muddati", type: 'i18n', help: 'Masalan: 2 yil 10 oy' },
+      { name: 'study_form', label: "Ta'lim shakli", type: 'i18n', help: 'Masalan: Kunduzgi' },
+      { name: 'language', label: "Ta'lim tili", type: 'i18n', help: "Masalan: O'zbek, rus" },
+      { name: 'quota', label: 'Qabul kvotasi', type: 'number' },
+      { name: 'sort_order', label: 'Tartib raqami', type: 'number' },
+      { name: 'published', label: "Saytda ko'rsatilsin", type: 'checkbox' },
+    ],
+    defaults: { published: true, sort_order: 0 },
+    columns: [
+      { label: 'Nomi', field: 'name', kind: 'i18n' },
+      { label: 'Kvota', field: 'quota', kind: 'number' },
+      { label: 'Tartib', field: 'sort_order', kind: 'number' },
+      { label: "Ko'rinadi", field: 'published', kind: 'bool' },
+    ],
+    orderBy: { column: 'sort_order', ascending: true },
+  },
+
+  departments: {
+    key: 'departments',
+    table: 'departments',
+    plural: "Bo'limlar va kafedralar",
+    singular: "Bo'lim",
+    hasSite: false,
+    mainOnly: true,
+    fields: [
+      { name: 'name', label: 'Nomi', type: 'i18n', required: true },
+      { name: 'slug', label: 'Havola (slug)', type: 'slug', from: 'name' },
+      { name: 'description', label: 'Tavsif', type: 'i18n-textarea' },
+      { name: 'sort_order', label: 'Tartib raqami', type: 'number' },
+    ],
+    defaults: { sort_order: 0 },
+    columns: [
+      { label: 'Nomi', field: 'name', kind: 'i18n' },
+      { label: 'Tartib', field: 'sort_order', kind: 'number' },
+    ],
+    orderBy: { column: 'sort_order', ascending: true },
+  },
+
+  pages: {
+    key: 'pages',
+    table: 'pages',
+    plural: 'Sahifalar',
+    singular: 'Sahifa',
+    hasSite: true,
+    fields: [
+      SITE_FIELD,
+      { name: 'title', label: 'Sarlavha', type: 'i18n', required: true },
+      {
+        name: 'slug',
+        label: 'Havola (slug)',
+        type: 'slug',
+        from: 'title',
+        help: "Maxsus: about (Texnikum haqida), contact (Aloqa), admission (Qabul qoidalari matni). Sahifa manzili: /p/<slug>",
+      },
+      { name: 'body', label: 'Matn (Markdown)', type: 'i18n-markdown' },
+      { name: 'sort_order', label: 'Tartib raqami', type: 'number' },
+      { name: 'published', label: "Saytda ko'rsatilsin", type: 'checkbox' },
+    ],
+    defaults: { published: true, sort_order: 0 },
+    columns: [
+      { label: 'Sarlavha', field: 'title', kind: 'i18n' },
+      { label: 'Slug', field: 'slug', kind: 'text' },
+      { label: 'Sayt', field: 'site', kind: 'site' },
+      { label: "Ko'rinadi", field: 'published', kind: 'bool' },
+    ],
+    orderBy: { column: 'sort_order', ascending: true },
+  },
+};
+
+export const SOCIAL_KEYS = ['telegram', 'instagram', 'facebook', 'youtube'] as const;

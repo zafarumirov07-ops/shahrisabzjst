@@ -1,0 +1,164 @@
+{
+  "_source": "https://kasbedu.uz/shahrisabz-abu-ali-ibn-sino-nomidagi-jamoat-salomatligi-texnikumi (2026-11-17 holatida)",
+  "settings": {
+    "main": {
+      "contact": {
+        "phone": "+998 90 314 08 77",
+        "email": "uygunamirov067@gmail.com",
+        "address": {
+          "uz": "Shahrisabz shahri, \"Tutzor\" MFY, Buyuk Ipak yo‘li ko‘chasi, 1-uy",
+          "ru": "г. Шахрисабз, МФЙ «Тутзор», улица Буюк Ипак Йули, дом 1",
+          "en": "1 Buyuk Ipak Yo'li Street, Tutzor MFY, Shahrisabz"
+        },
+        "working_hours": {
+          "uz": "Qabul komissiyasi: dushanba–shanba, 9:00–17:00",
+          "ru": "Приёмная комиссия: понедельник–суббота, 9:00–17:00",
+          "en": "Admissions office: Monday–Saturday, 9:00–17:00"
+        }
+      },
+      "stats": { "students": "1161", "teachers": "50", "founded": "1966" }
+    },
+    "talimsifati": {
+      "contact": {
+        "phone": "+998 90 314 08 77",
+        "email": "uygunamirov067@gmail.com",
+        "address": {
+          "uz": "Shahrisabz shahri, \"Tutzor\" MFY, Buyuk Ipak yo‘li ko‘chasi, 1-uy",
+          "ru": "г. Шахрисабз, МФЙ «Тутзор», улица Буюк Ипак Йули, дом 1",
+          "en": "1 Buyuk Ipak Yo'li Street, Tutzor MFY, Shahrisabz"
+        }
+      }
+    }
+  },
+  "pages": [
+    {
+      "site": "main",
+      "slug": "about",
+      "sort_order": 1,
+      "title": { "uz": "Texnikum haqida", "ru": "О техникуме", "en": "About the school" },
+      "body": {
+        "uz": "Shahrisabz Abu Ali ibn Sino nomidagi Jamoat salomatligi texnikumi — tibbiyot yo‘nalishida o‘rta maxsus mutaxassislar tayyorlaydigan ta’lim muassasasi. Bu yerda talabalar hamshiralik ishi, feldsherlik ishi, funksional diagnostika ishi va farmatsiya kabi yo‘nalishlarda bilim oladi.\n\n## Tarix va infratuzilma\n\n- Texnikum **1966 yilda** tashkil etilgan.\n- **900 o‘rinli** o‘quv binosi.\n- **300 talaba** joylashadigan yotoqxona.\n- **250 o‘rinli** zamonaviy faollar zali.\n- Sport zali.\n- Kutubxona (axborot-resurs markazi) 297,42 m² maydonga ega, 2 ta o‘quv zali va 60 ta o‘rin mavjud.",
+        "ru": "Шахрисабзский техникум общественного здоровья имени Абу Али ибн Сино — учебное заведение, готовящее специалистов среднего звена в области медицины. Студенты получают знания по направлениям: сестринское дело, фельдшерское дело, функциональная диагностика и фармация.\n\n## История и инфраструктура\n\n- Техникум основан в **1966 году**.\n- Учебный корпус на **900 мест**.\n- Общежитие на **300 студентов**.\n- Современный актовый зал на **250 мест**.\n- Спортивный зал.\n- Библиотека (информационно-ресурсный центр) площадью 297,42 м², 2 читальных зала, 60 посадочных мест.",
+        "en": "Shahrisabz Abu Ali ibn Sino Public Health Technical School is an institution that trains mid-level medical specialists. Students study nursing, paramedic practice, functional diagnostics and pharmacy.\n\n## History and facilities\n\n- Founded in **1966**.\n- A teaching building for **900 students**.\n- A dormitory for **300 students**.\n- A modern assembly hall with **250 seats**.\n- A sports hall.\n- A library (information and resource centre) of 297.42 m² with 2 reading rooms and 60 seats."
+      }
+    }
+  ],
+  "programs": [
+    {
+      "slug": "feldsherlik-ishi",
+      "sort_order": 1,
+      "name": { "uz": "Feldsherlik ishi", "ru": "Фельдшерское дело", "en": "Paramedic practice" }
+    },
+    {
+      "slug": "tibbiy-profilaktika-ishi",
+      "sort_order": 2,
+      "name": { "uz": "Tibbiy profilaktika ishi", "ru": "Медико-профилактическое дело", "en": "Preventive medicine" }
+    },
+    {
+      "slug": "hamshiralik-ishi",
+      "sort_order": 3,
+      "name": { "uz": "Hamshiralik ishi", "ru": "Сестринское дело", "en": "Nursing" }
+    },
+    {
+      "slug": "farmatsiya",
+      "sort_order": 4,
+      "name": { "uz": "Farmatsiya", "ru": "Фармация", "en": "Pharmacy" }
+    },
+    {
+      "slug": "davolash-ishi",
+      "sort_order": 5,
+      "name": { "uz": "Davolash ishi", "ru": "Лечебное дело", "en": "General medicine" }
+    },
+    {
+      "slug": "funksional-diagnostika-ishi",
+      "sort_order": 6,
+      "name": { "uz": "Funksional diagnostika ishi", "ru": "Функциональная диагностика", "en": "Functional diagnostics" },
+      "description": {
+        "uz": "Bitiruvchilar poliklinikalar, shifoxonalar va diagnostika markazlarida EKG, ultratovush va boshqa funksional tekshiruvlarni o‘tkazuvchi o‘rta tibbiyot xodimi sifatida ishlaydi.",
+        "ru": "Выпускники работают средними медицинскими работниками в поликлиниках, больницах и диагностических центрах, проводя ЭКГ, УЗИ и другие функциональные исследования.",
+        "en": "Graduates work as mid-level medical staff in polyclinics, hospitals and diagnostic centres, performing ECG, ultrasound and other functional examinations."
+      }
+    }
+  ],
+  "programDefaults": {
+    "description": {
+      "uz": "Bitiruvchilar davolash-profilaktika muassasalari, poliklinikalar va dorixonalarda o‘rta tibbiyot xodimi sifatida ishlaydi.",
+      "ru": "Выпускники работают средними медицинскими работниками в лечебно-профилактических учреждениях, поликлиниках и аптеках.",
+      "en": "Graduates work as mid-level medical staff in healthcare facilities, polyclinics and pharmacies."
+    },
+    "duration": { "uz": "2 yil", "ru": "2 года", "en": "2 years" }
+  },
+  "posts": [
+    {
+      "site": "main",
+      "kind": "news",
+      "slug": "talabalar-turar-joyi-yangi-oquv-yiliga-tayyorlanmoqda",
+      "published_at": "2026-08-20T09:00:00+05:00",
+      "cover_url": "/images/import/news-yotoqxona.png",
+      "title": { "uz": "Talabalar turar joyi yangi o‘quv yiliga tayyorlanmoqda." },
+      "excerpt": { "uz": "Yangi 2026/2027-o‘quv yilini munosib kutib olish uchun talabalar turar joyida keng ko‘lamli tayyorgarlik ishlari olib borilmoqda." },
+      "body": {
+        "uz": "Shahrisabz Abu Ali ibn Sino nomidagi Jamoat salomatligi texnikumi talabalar turar joyida qizg‘in tayyorgarlik ishlari olib borilmoqda.\n\nYangi 2026/2027-o‘quv yilini munosib kutib olish, talabalar uchun qulay va sanitariya-gigiyena talablariga javob beradigan shart-sharoitlarni yaratish maqsadida Shahrisabz Abu Ali ibn Sino nomidagi Jamoat salomatligi texnikumi talabalar turar joyida keng ko‘lamli tayyorgarlik ishlari olib borilmoqda.\n\nAyni kunlarda talabalar turar joyining barcha hududlarida obodonlashtirish, tozalash va tartibga keltirish ishlari qizg‘in davom etmoqda. Xususan, yotoqxonalardagi xonalar, umumiy foydalanish joylari, yo‘laklar hamda sanitariya-gigiyena xonalari tozalanib, zarur sanitariya talablariga muvofiq holatga keltirilmoqda. Xonalarda tozalik va ozodalikka alohida e’tibor qaratilib, talabalar uchun qulay va shinam muhit yaratishga harakat qilinmoqda."
+      }
+    },
+    {
+      "site": "talimsifati",
+      "kind": "news",
+      "slug": "farmatsiya-talim-dasturini-takomillashtirish",
+      "published_at": "2026-08-13T09:00:00+05:00",
+      "cover_url": "/images/import/news-farmatsiya.jpg",
+      "title": { "uz": "Farmatsiya ta’lim dasturini takomillashtirish" },
+      "excerpt": { "uz": "Ta’lim dasturlarini takomillashtirish bo‘yicha amalga oshirilayotgan ishlar ochiq va shaffof tarzda jamoatchilikka yetkazib borilmoqda." },
+      "body": {
+        "uz": "Shahrisabz Abu Ali ibn Sino nomidagi Jamoat salomatligi texnikumida ta’lim dasturlarini takomillashtirish bo‘yicha amalga oshirilayotgan ishlar to‘g‘risidagi ma’lumotlar ochiq va shaffof tarzda jamoatchilikka yetkazib borilmoqda.\n\nTa’lim dasturlarining mazmuni va sifatini yanada takomillashtirish maqsadida o‘quvchilar, pedagoglar, ish beruvchilar hamda boshqa manfaatdor tomonlarning fikr-mulohazalari muntazam o‘rganib boriladi. O‘tkazilgan so‘rovnomalar, tahlillar, muhokamalar va takliflar asosida ta’lim dasturlariga tegishli o‘zgartirish va takomillashtirishlar kiritish bo‘yicha chora-tadbirlar amalga oshiriladi.\n\nJumladan, “Hamshiralik ishi”, “Davolash ishi”, “Farmatsiya” va “Funksional diagnostika ishi” ta’lim yo‘nalishlari bo‘yicha ta’lim dasturlarining amaldagi holati, mazmuni, o‘quv natijalari hamda mehnat bozori talablariga muvofiqligi muntazam tahlil qilinadi.\n\nTa’lim dasturlarini takomillashtirish jarayonida:\n\n- o‘quvchilar va pedagoglarning fikr-mulohazalari o‘rganiladi;\n- ish beruvchilar va amaliyotchi mutaxassislarning takliflari tahlil qilinadi;\n- ta’lim dasturlarining mehnat bozori talablariga muvofiqligi baholanadi;\n- o‘quv-me’yoriy hujjatlar takomillashtiriladi;\n- zamonaviy pedagogik va axborot texnologiyalaridan foydalanish imkoniyatlari kengaytiriladi;\n- aniqlangan kamchiliklarni bartaraf etish bo‘yicha tegishli chora-tadbirlar belgilanadi.\n\nTa’lim dasturlarini takomillashtirish natijalari, amalga oshirilgan ishlar hamda tegishli ma’lumotlar texnikumning rasmiy veb-sayti va ijtimoiy tarmoqlardagi sahifalarida muntazam ravishda ochiq e’lon qilib boriladi.\n\nMazkur faoliyat ta’lim sifatini oshirish, ta’lim jarayonining shaffofligini ta’minlash hamda manfaatdor tomonlarning ta’lim dasturlarini takomillashtirishdagi ishtirokini kengaytirishga xizmat qiladi."
+      }
+    },
+    {
+      "site": "talimsifati",
+      "kind": "news",
+      "slug": "sorovnoma-natijalari-asosida-amalga-oshiriladigan-ishlar",
+      "published_at": "2026-08-10T10:00:00+05:00",
+      "cover_url": "/images/import/news-sorovnoma.jpg",
+      "title": { "uz": "So‘rovnoma natijalari asosida amalga oshiriladigan ishlar." },
+      "excerpt": { "uz": "“Davolash ishi” yo‘nalishida o‘tkazilgan onlayn so‘rovnomada 59 nafar talaba ishtirok etdi. Natijalar asosida ta’lim dasturi takomillashtirilmoqda." },
+      "body": {
+        "uz": "Shahrisabz Abu Ali ibn Sino nomidagi Jamoat salomatligi texnikumida “Davolash ishi” yo‘nalishida ta’lim sifatini yanada takomillashtirish maqsadida talabalar o‘rtasida amaldagi ta’lim dasturini baholash bo‘yicha onlayn so‘rovnoma o‘tkazildi. So‘rovnomada 59 nafar talaba ishtirok etdi.\n\nSo‘rovnoma natijalari tahlili davomida ta’lim dasturining umumiy samaradorligi ijobiy baholangani bilan bir qatorda, amaliy mashg‘ulotlar hajmini oshirish, zamonaviy tibbiy texnologiyalarni chuqurroq o‘rgatish, klinik amaliyotlarni takomillashtirish va moddiy-texnik bazani mustahkamlash bo‘yicha takliflar bildirilgani aniqlandi.\n\nTalabalar tomonidan bildirilgan takliflar asosida quyidagi o‘zgarish va takomillashtirish ishlari amalga oshirilmoqda:\n\n- amaliy mashg‘ulotlarning hajmi va mazmuni takomillashtirildi, kasbiy ko‘nikmalarni amaliyotda mustahkamlashga yo‘naltirilgan mashg‘ulotlarga ustuvor ahamiyat berildi;\n- o‘quv mashg‘ulotlarida real klinik vaziyatlarga asoslangan amaliy topshiriqlar va vaziyatli masalalardan foydalanish kengaytirildi;\n- talabalarni zamonaviy tibbiyot amaliyotiga tayyorlash maqsadida zamonaviy tibbiy texnologiyalar va diagnostika usullaridan foydalanish bo‘yicha amaliy mashg‘ulotlar kuchaytirildi;\n- klinik va ishlab chiqarish amaliyotlarining samaradorligini oshirish, talabalarni real tibbiy muhitda mustaqil ishlashga tayyorlash bo‘yicha amaliy ishlar kuchaytirildi;\n- amaliy ko‘nikmalarni shakllantirishda simulyatsion mashg‘ulotlar, amaliy topshiriqlar va ko‘nikmalarni bosqichma-bosqich baholash usullaridan foydalanish kengaytirildi;\n- o‘quv xonalari va amaliy laboratoriyalardagi mavjud jihozlardan samarali foydalanish hamda moddiy-texnik bazani bosqichma-bosqich yangilash bo‘yicha ishlar olib borilmoqda;\n- o‘qituvchilarning dars jarayonida interaktiv va innovatsion pedagogik texnologiyalardan foydalanishi yanada kuchaytirildi;\n- talabalar tomonidan bildirilgan takliflarni inobatga olgan holda ta’lim dasturini muntazam takomillashtirib borish mexanizmi yo‘lga qo‘yildi;\n- ta’lim dasturining mehnat bozori talablariga mosligini ta’minlash maqsadida tibbiyot muassasalari va ish beruvchilarning fikr-mulohazalarini o‘rganishga alohida e’tibor qaratilmoqda.\n\n## Natija\n\nAmalga oshirilgan va rejalashtirilgan o‘zgarishlar natijasida “Davolash ishi” yo‘nalishi talabalarining nazariy bilimlarini amaliy ko‘nikmalar bilan uyg‘unlashtirish, klinik vaziyatlarda mustaqil qaror qabul qilish, zamonaviy tibbiy texnologiyalardan foydalanish hamda mehnat bozorida talab etiladigan kasbiy kompetensiyalarini rivojlantirish imkoniyatlari kengaytirilmoqda.\n\nSo‘rovnoma natijalari va talabalar tomonidan bildirilgan takliflar kelgusida ta’lim dasturini takomillashtirishda muhim ichki sifat monitoringi va qayta aloqa mexanizmi sifatida foydalanilmoqda. Mazkur natijalar asosida amalga oshirilayotgan o‘zgarishlar ta’lim sifatini doimiy ravishda “so‘rovnoma → tahlil → taklif → o‘zgarish → qayta monitoring” tamoyili asosida takomillashtirishga xizmat qiladi.\n\nSo‘rovnoma natijalari va ular asosida amalga oshirilgan ishlar texnikumning ta’lim sifatini ichki ta’minlash tizimi doirasida muntazam tahlil qilinib, manfaatdor tomonlar uchun ochiq tarzda e’lon qilib boriladi."
+      }
+    },
+    {
+      "site": "main",
+      "kind": "news",
+      "slug": "texnikum-arm-faoliyati-haqida",
+      "published_at": "2026-08-10T09:00:00+05:00",
+      "cover_url": "/images/import/news-arm.jpg",
+      "title": { "uz": "Texnikum ARM faoliyati haqida." },
+      "excerpt": { "uz": "Texnikum kutubxonasi (axborot-resurs markazi) 297,42 m² maydonga ega, umumiy fondi 31 722 ta nashrdan iborat." },
+      "body": {
+        "uz": "Texnikum kutubxonasida 2 nafar malakali xodim faoliyat yuritib kelmoqda: Raxmonova Sveta Qarshiyevna va Qayumova Gulzoda Yaxyoyevna. Malakali xodimlarimiz malaka oshirish kurslaridan o‘tgan.\n\nTexnikum kutubxonasi 297,42 m² ga ega bo‘lib, xonalar soni 6 ta, o‘quv zali 2 ta, o‘quv zalida o‘rinlar soni 60 ta, ARMda kitob aylanishi 3,1, kitob bilan ta’minlanish 100%, qatnov 15 102 ta, o‘tkazilgan tadbirlar 28 ta, kutubxonaning umumiy fondi 31 722 ta, shundan darsliklar 29 426, badiiy adabiyotlar 812 ta, siyosiy adabiyotlar 1044 ta, elektron darsliklar 632 ta, o‘qitish materiallari to‘plami 42 ta, raqamli ta’lim resurslari 3 ta, multimediyalar 67 ta va turli adabiyotlar 440 ta.\n\nARM fondi to‘g‘risida texnikum saytida to‘liq materiallar kiritilishi tashkil qilindi. Bundan tashqari ARM haqida ma’lumotlar bazasi texnikum saytida kengaytirilgan holda kiritildi."
+      }
+    }
+  ],
+  "albums": [
+    {
+      "site": "main",
+      "slug": "infratuzilma",
+      "published_at": "2026-08-10T12:00:00+05:00",
+      "cover_url": "/images/campus.jpg",
+      "title": { "uz": "Texnikum infratuzilmasi", "ru": "Инфраструктура техникума", "en": "School facilities" },
+      "description": {
+        "uz": "Texnikum binosi va hududidan lavhalar.",
+        "ru": "Здание и территория техникума.",
+        "en": "The school building and grounds."
+      },
+      "items": [
+        { "kind": "image", "url": "/images/campus.jpg" },
+        { "kind": "image", "url": "/images/import/campus-1.jpg" },
+        { "kind": "image", "url": "/images/import/campus-2.jpg" },
+        { "kind": "image", "url": "/images/import/campus-3.jpg" },
+        { "kind": "image", "url": "/images/import/campus-4.jpg" },
+        { "kind": "image", "url": "/images/import/campus-5.jpg" },
+        { "kind": "image", "url": "/images/import/campus-6.jpg" }
+      ]
+    }
+  ]
+}
