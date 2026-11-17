@@ -17,7 +17,7 @@ export default async function LoginPage() {
         <div className="mb-6 flex flex-col items-center text-center">
           <LogoMark className="h-16 w-16" />
           <h1 className="mt-4 text-xl font-bold">Admin panel</h1>
-          <p className="mt-1 text-sm text-muted">Abu Ali ibn Sino nomidagi jamoat salomatligi texnikumi</p>
+          <p className="mt-1 text-sm text-muted">Shahrisabz Abu Ali ibn Sino nomidagi jamoat salomatligi texnikumi</p>
         </div>
         {configured ? (
           <LoginForm />

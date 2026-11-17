@@ -23,7 +23,7 @@ export async function PostListPage({
   kind: Kind;
   page: number;
 }) {
-  const { site, locale, dict } = ctx;
+  const { site, locale, dict, base } = ctx;
   const section = kind === 'news' ? 'news' : 'announcements';
   const { rows, total } = await getPosts({ site, kind, page });
 
@@ -44,7 +44,7 @@ export async function PostListPage({
               page={page}
               total={total}
               pageSize={PAGE_SIZE}
-              basePath={`/${locale}/${section}`}
+              basePath={`${base}/${section}`}
               dict={dict}
             />
           </>
@@ -159,7 +159,7 @@ function Attachments({ media, ctx }: { media: PostMedia[]; ctx: Ctx }) {
 }
 
 export async function PostDetailPage({ ctx, slug }: { ctx: Ctx; slug: string }) {
-  const { site, locale, dict } = ctx;
+  const { site, locale, dict, base } = ctx;
   const data = await getPostBySlug(site, slug);
   if (!data) notFound();
   const { post, media } = data;
@@ -167,7 +167,7 @@ export async function PostDetailPage({ ctx, slug }: { ctx: Ctx; slug: string }) 
 
   return (
     <article className="container-page max-w-3xl py-6 sm:py-10">
-      <Link href={`/${locale}/${section}`} className="link inline-flex items-center text-[15px] font-medium">
+      <Link href={`${base}/${section}`} className="link inline-flex items-center text-[15px] font-medium">
         <Icon name="chevron-left" className="h-5 w-5" strokeWidth={2.2} />
         {post.kind === 'announcement' ? dict.nav.announcements : dict.nav.news}
       </Link>

@@ -3,7 +3,7 @@ import Icon from '@/components/Icon';
 import type { Locale } from '@/lib/i18n/config';
 import { tr } from '@/lib/i18n/config';
 import type { Dict } from '@/lib/i18n/dictionaries';
-import type { Site } from '@/lib/site';
+import { homeOf, type Site } from '@/lib/site';
 import type { SiteSettings } from '@/lib/types';
 import { buildNav, flatNav, LogoMark } from './Header';
 import { SOCIAL_ICON } from './ui';
@@ -76,7 +76,7 @@ export default function Footer({
                 </li>
               ))}
               <li>
-                <Link href={`/${locale}/contact`} className="text-white/80 transition hover:text-white">
+                <Link href={`${homeOf(site, locale)}/contact`} className="text-white/80 transition hover:text-white">
                   {dict.nav.contact}
                 </Link>
               </li>

@@ -3,7 +3,9 @@
 Shahrisabz Abu Ali ibn Sino nomidagi jamoat salomatligi texnikumi rasmiy sayti.
 
 - **Asosiy sayt:** `shahrisabzjst.uz`
-- **Ta'lim sifati:** `talimsifati.shahrisabzjst.uz` (bitta loyiha, host bo'yicha ajratiladi)
+- **Ta'lim sifati:** hozircha domensiz `/talimsifati/uz` manzilida (masalan `shahrisabzjst.vercel.app/talimsifati/uz`).
+  Domen ulangach Vercel'da `NEXT_PUBLIC_QUALITY_MODE=subdomain` qo'yib Redeploy qilinsa, havolalar
+  `talimsifati.shahrisabzjst.uz` ga o'tadi (`/talimsifati/...` manzili ham ishlashda davom etadi).
 - **Admin panel:** `/admin` (ikkala hostda ham ochiladi)
 - **Stack:** Next.js 15 (App Router), Supabase (Postgres, Storage), Tailwind
 - **Dizayn:** havorang va yashil ranglar, to'la kenglik, animatsiyalar (hero, scroll bilan paydo bo'lish, raqam sanash).

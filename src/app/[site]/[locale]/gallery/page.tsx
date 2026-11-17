@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: { params: SiteParams }): Prom
 }
 
 export default async function GalleryPage({ params }: { params: SiteParams }) {
-  const { site, locale, dict } = await getCtx(params);
+  const { site, locale, dict, base } = await getCtx(params);
   const albums = await getAlbums(site, 60);
 
   return (
@@ -26,7 +26,7 @@ export default async function GalleryPage({ params }: { params: SiteParams }) {
         ) : (
           <Grid cols={3}>
             {albums.map((a) => (
-              <Link key={a.id} href={`/${locale}/gallery/${a.slug}`} className="card group overflow-hidden">
+              <Link key={a.id} href={`${base}/gallery/${a.slug}`} className="card group overflow-hidden">
                 <div className="aspect-[4/3] overflow-hidden bg-surface2">
                   {a.cover_url && (
                     // eslint-disable-next-line @next/next/no-img-element

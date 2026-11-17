@@ -122,9 +122,9 @@ async function Hero({
                 <span className="flex h-10 w-10 items-center justify-center rounded-full bg-sky/25 text-sky">
                   <Icon name={badges[1].icon} className="h-5 w-5" />
                 </span>
-                <span className="leading-tight">
-                  <span className="block text-xl font-extrabold">{badges[1].value}</span>
-                  <span className="block text-[12px] text-white/70">{badges[1].label}</span>
+                <span className="max-w-[12rem] leading-tight sm:max-w-[15rem]">
+                  <span className="block text-lg font-extrabold sm:text-xl">{badges[1].value}</span>
+                  <span className="block text-[11px] leading-snug text-white/70 sm:text-[12px]">{badges[1].label}</span>
                 </span>
               </div>
             )}
@@ -202,12 +202,12 @@ function QuickRow({
   );
 }
 
-function AlbumGrid({ albums, locale }: { albums: Awaited<ReturnType<typeof getAlbums>>; locale: Ctx['locale'] }) {
+function AlbumGrid({ albums, locale, base }: { albums: Awaited<ReturnType<typeof getAlbums>>; locale: Ctx['locale']; base: string }) {
   return (
     <Grid cols={4}>
       {albums.map((a, i) => (
         <Reveal key={a.id} delay={i * 90} anim="zoom">
-          <Link href={`/${locale}/gallery/${a.slug}`} className="card card-hover group block overflow-hidden">
+          <Link href={`${base}/gallery/${a.slug}`} className="card card-hover group block overflow-hidden">
             <div className="aspect-[4/3] overflow-hidden bg-surface2">
               {a.cover_url && (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -228,7 +228,7 @@ function AlbumGrid({ albums, locale }: { albums: Awaited<ReturnType<typeof getAl
 }
 
 async function MainHome(ctx: Ctx) {
-  const { site, locale, dict } = ctx;
+  const { site, locale, dict, base } = ctx;
   const [news, announcements, events, programs, albums, settings, about] = await Promise.all([
     getPosts({ site, kind: 'news', limit: 6 }),
     getPosts({ site, kind: 'announcement', limit: 5 }),
@@ -258,7 +258,7 @@ async function MainHome(ctx: Ctx) {
           { icon: 'graduation', value: String(programs.length || 6), label: dict.home.programsShort },
         ]}
       >
-        <Link href={`/${locale}/admission`} className="btn !px-6 !py-3.5 !text-base shadow-glow">
+        <Link href={`${base}/admission`} className="btn !px-6 !py-3.5 !text-base shadow-glow">
           {dict.home.admissionCta}
           <Icon name="arrow-right" className="h-[18px] w-[18px]" strokeWidth={2.4} />
         </Link>
@@ -272,12 +272,12 @@ async function MainHome(ctx: Ctx) {
       <QuickRow
         image="/images/import/campus-2.jpg"
         imageTitle={dict.home.cards.about}
-        imageHref={`/${locale}/p/about`}
+        imageHref={`${base}/p/about`}
         moreLabel={dict.home.cards.more}
         items={[
-          { href: `/${locale}/admission`, icon: 'graduation', title: dict.home.cards.admission, text: dict.home.cards.admissionText },
+          { href: `${base}/admission`, icon: 'graduation', title: dict.home.cards.admission, text: dict.home.cards.admissionText },
           { href: siteUrl('talimsifati', locale), icon: 'shield', title: dict.home.cards.quality, text: dict.home.cards.qualityText, external: true },
-          { href: `/${locale}/gallery`, icon: 'image', title: dict.home.cards.gallery, text: dict.home.cards.galleryText },
+          { href: `${base}/gallery`, icon: 'image', title: dict.home.cards.gallery, text: dict.home.cards.galleryText },
         ]}
       />
 
@@ -316,7 +316,7 @@ async function MainHome(ctx: Ctx) {
               </ul>
             )}
             <Link
-              href={`/${locale}/p/about`}
+              href={`${base}/p/about`}
               className="group mt-8 flex items-center justify-between gap-4 rounded-full px-5 py-3 text-white"
               style={{ background: 'linear-gradient(135deg,#052542,#0a3c63)' }}
             >
@@ -339,12 +339,12 @@ async function MainHome(ctx: Ctx) {
         {/* Yo'nalishlar */}
         {programs.length > 0 && (
           <section>
-            <SectionHeading badge={dict.home.programsBadge} title={dict.home.programsTitle} href={`/${locale}/admission`} hrefLabel={dict.common.all} />
+            <SectionHeading badge={dict.home.programsBadge} title={dict.home.programsTitle} href={`${base}/admission`} hrefLabel={dict.common.all} />
             <ul className="grid gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-3">
               {programs.map((p, i) => (
                 <Reveal as="li" key={p.id} delay={(i % 3) * 110} anim="up">
                   <Link
-                    href={`/${locale}/admission`}
+                    href={`${base}/admission`}
                     className="group relative block h-full overflow-hidden rounded-ios p-6 text-white shadow-ios transition duration-300 hover:-translate-y-1 hover:shadow-ios-lg"
                     style={{ background: 'linear-gradient(145deg,#06335a,#0b5a7c)' }}
                   >
@@ -376,7 +376,7 @@ async function MainHome(ctx: Ctx) {
 
         {/* Yangiliklar */}
         <section>
-          <SectionHeading badge={dict.home.mediaBadge} title={dict.home.latestNews} href={`/${locale}/news`} hrefLabel={dict.common.all} />
+          <SectionHeading badge={dict.home.mediaBadge} title={dict.home.latestNews} href={`${base}/news`} hrefLabel={dict.common.all} />
           {news.rows.length === 0 ? (
             <EmptyState text={dict.common.noData} icon="newspaper" />
           ) : (
@@ -392,14 +392,14 @@ async function MainHome(ctx: Ctx) {
 
         <div className="grid gap-12 lg:grid-cols-2 lg:gap-10">
           <Reveal as="section" anim="left">
-            <SectionHeading title={dict.home.latestAnnouncements} href={`/${locale}/announcements`} hrefLabel={dict.common.all} />
+            <SectionHeading title={dict.home.latestAnnouncements} href={`${base}/announcements`} hrefLabel={dict.common.all} />
             {announcements.rows.length === 0 ? (
               <EmptyState text={dict.common.noData} icon="megaphone" />
             ) : (
               <ul className="list">
                 {announcements.rows.map((p) => (
                   <li key={p.id}>
-                    <Link href={`/${locale}/announcements/${p.slug}`} className="list-row">
+                    <Link href={`${base}/announcements/${p.slug}`} className="list-row">
                       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--accent-soft)] text-accent">
                         <Icon name="megaphone" className="h-5 w-5" />
                       </span>
@@ -413,7 +413,7 @@ async function MainHome(ctx: Ctx) {
           </Reveal>
 
           <Reveal as="section" anim="right">
-            <SectionHeading title={dict.home.upcomingEvents} href={`/${locale}/events`} hrefLabel={dict.common.all} />
+            <SectionHeading title={dict.home.upcomingEvents} href={`${base}/events`} hrefLabel={dict.common.all} />
             {events.length === 0 ? (
               <EmptyState text={dict.common.noData} icon="calendar" />
             ) : (
@@ -428,8 +428,8 @@ async function MainHome(ctx: Ctx) {
 
         {albums.length > 0 && (
           <section>
-            <SectionHeading badge={dict.home.gallery} title={dict.home.gallery} href={`/${locale}/gallery`} hrefLabel={dict.common.all} />
-            <AlbumGrid albums={albums} locale={locale} />
+            <SectionHeading badge={dict.home.gallery} title={dict.home.gallery} href={`${base}/gallery`} hrefLabel={dict.common.all} />
+            <AlbumGrid albums={albums} locale={locale} base={base} />
           </section>
         )}
 
@@ -463,7 +463,7 @@ async function MainHome(ctx: Ctx) {
 }
 
 async function QualityHome(ctx: Ctx) {
-  const { site, locale, dict } = ctx;
+  const { site, locale, dict, base } = ctx;
   const [posts, staff, events, albums] = await Promise.all([
     getPosts({ site, limit: 6 }),
     getStaff(site),
@@ -477,10 +477,10 @@ async function QualityHome(ctx: Ctx) {
         {...ctx}
         badges={[
           { icon: 'newspaper', value: String(posts.total), label: dict.nav.news },
-          { icon: 'shield', value: dict.nav.quality.split(' ')[0], label: dict.siteShort },
+          { icon: 'shield', value: dict.nav.quality, label: dict.siteName },
         ]}
       >
-        <Link href={`/${locale}/news`} className="btn !px-6 !py-3.5 !text-base shadow-glow">
+        <Link href={`${base}/news`} className="btn !px-6 !py-3.5 !text-base shadow-glow">
           <Icon name="newspaper" className="h-[18px] w-[18px]" />
           {dict.nav.news}
         </Link>
@@ -497,15 +497,15 @@ async function QualityHome(ctx: Ctx) {
         imageHref={siteUrl('main', locale)}
         moreLabel={dict.nav.mainSite}
         items={[
-          { href: `/${locale}/news`, icon: 'newspaper', title: dict.home.cards.news, text: dict.home.cards.newsText },
-          { href: `/${locale}/team`, icon: 'users', title: dict.home.cards.team, text: dict.home.cards.teamText },
-          { href: `/${locale}/gallery`, icon: 'image', title: dict.home.cards.gallery, text: dict.home.cards.galleryText },
+          { href: `${base}/news`, icon: 'newspaper', title: dict.home.cards.news, text: dict.home.cards.newsText },
+          { href: `${base}/team`, icon: 'users', title: dict.home.cards.team, text: dict.home.cards.teamText },
+          { href: `${base}/gallery`, icon: 'image', title: dict.home.cards.gallery, text: dict.home.cards.galleryText },
         ]}
       />
 
       <div className="container-page space-y-20 py-16 sm:space-y-28 sm:py-24">
         <section>
-          <SectionHeading badge={dict.nav.quality} title={dict.quality.latest} href={`/${locale}/news`} hrefLabel={dict.common.all} />
+          <SectionHeading badge={dict.nav.quality} title={dict.quality.latest} href={`${base}/news`} hrefLabel={dict.common.all} />
           {posts.rows.length === 0 ? (
             <EmptyState text={dict.common.noData} icon="newspaper" />
           ) : (
@@ -521,7 +521,7 @@ async function QualityHome(ctx: Ctx) {
 
         {staff.length > 0 && (
           <section>
-            <SectionHeading badge={dict.nav.teamQuality} title={dict.quality.responsible} href={`/${locale}/team`} hrefLabel={dict.common.all} />
+            <SectionHeading badge={dict.nav.teamQuality} title={dict.quality.responsible} href={`${base}/team`} hrefLabel={dict.common.all} />
             <ul className="grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
               {staff.slice(0, 4).map((s) => (
                 <StaffCard key={s.id} person={s} locale={locale} dict={dict} />
@@ -532,7 +532,7 @@ async function QualityHome(ctx: Ctx) {
 
         {events.length > 0 && (
           <Reveal as="section">
-            <SectionHeading title={dict.home.upcomingEvents} href={`/${locale}/events`} hrefLabel={dict.common.all} />
+            <SectionHeading title={dict.home.upcomingEvents} href={`${base}/events`} hrefLabel={dict.common.all} />
             <ul className="list">
               {events.map((e) => (
                 <EventItem key={e.id} event={e} locale={locale} />
@@ -543,8 +543,8 @@ async function QualityHome(ctx: Ctx) {
 
         {albums.length > 0 && (
           <section>
-            <SectionHeading badge={dict.home.gallery} title={dict.home.gallery} href={`/${locale}/gallery`} hrefLabel={dict.common.all} />
-            <AlbumGrid albums={albums} locale={locale} />
+            <SectionHeading badge={dict.home.gallery} title={dict.home.gallery} href={`${base}/gallery`} hrefLabel={dict.common.all} />
+            <AlbumGrid albums={albums} locale={locale} base={base} />
           </section>
         )}
       </div>

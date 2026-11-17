@@ -89,7 +89,8 @@ export default function A11yPanel({
   }
 
   return (
-    <div className="relative" ref={ref}>
+    // "relative" yo'q: oyna header'ning o'ng chetiga tekislanadi va kichik ekranda chetdan chiqib ketmaydi
+    <div ref={ref}>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -104,7 +105,7 @@ export default function A11yPanel({
         <div
           role="dialog"
           aria-label={labels.title}
-          className="anim-pop absolute right-0 z-50 mt-3 w-[19rem] rounded-ios bg-surface p-4 text-fg shadow-ios-lg"
+          className="anim-pop absolute right-3 top-full z-50 mt-2 w-[min(19rem,calc(100vw-1.5rem))] rounded-ios bg-surface p-4 text-fg shadow-ios-lg sm:right-5 lg:right-8 2xl:right-12"
           style={{ border: '1px solid var(--line)' }}
         >
           <p className="mb-3 text-[15px] font-semibold">{labels.title}</p>

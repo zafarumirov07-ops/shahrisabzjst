@@ -1,13 +1,16 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Icon from '@/components/Icon';
 
 export type GalleryImage = { url: string; caption?: string | null };
 
-/** Rasmlar to'plami + to'liq ekran ko'rish (lightbox). */
+/** Rasmlar to'plami + to'liq ekran ko'rish (lightbox). Lightbox document.body ga chiqariladi. */
 export default function MediaGallery({ images }: { images: GalleryImage[] }) {
   const [index, setIndex] = useState<number | null>(null);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     if (index === null) return;
@@ -52,7 +55,7 @@ export default function MediaGallery({ images }: { images: GalleryImage[] }) {
         ))}
       </div>
 
-      {index !== null && (
+      {index !== null && mounted && createPortal(
         <div
           role="dialog"
           aria-modal="true"
@@ -98,13 +101,14 @@ export default function MediaGallery({ images }: { images: GalleryImage[] }) {
             <img
               src={images[index].url}
               alt={images[index].caption ?? ''}
-              className="max-h-[85vh] w-auto max-w-full rounded-2xl object-contain"
+              className="max-h-[80dvh] w-auto max-w-full rounded-2xl object-contain"
             />
             {images[index].caption && (
               <figcaption className="mt-3 text-center text-sm text-white/80">{images[index].caption}</figcaption>
             )}
           </figure>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );

@@ -4,6 +4,7 @@ import Icon, { type IconName } from '@/components/Icon';
 import { tr, type Locale } from '@/lib/i18n/config';
 import type { Dict } from '@/lib/i18n/dictionaries';
 import type { EventRow, Post, Staff } from '@/lib/types';
+import { homeOf } from '@/lib/site';
 import { formatDate, monthDay } from '@/lib/utils';
 import CountUp from './CountUp';
 import Reveal from './Reveal';
@@ -76,7 +77,7 @@ export function EmptyState({ text, icon = 'folder' }: { text: string; icon?: Ico
 
 export function PostCard({ post, locale, dict }: { post: Post; locale: Locale; dict: Dict }) {
   const section = post.kind === 'announcement' ? 'announcements' : 'news';
-  const href = `/${locale}/${section}/${post.slug}`;
+  const href = `${homeOf(post.site, locale)}/${section}/${post.slug}`;
   return (
     <article className="card card-hover group flex flex-col overflow-hidden">
       <Link href={href} className="relative block aspect-[16/10] overflow-hidden bg-surface2">

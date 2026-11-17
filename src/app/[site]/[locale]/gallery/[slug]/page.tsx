@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 
 export default async function AlbumPage({ params }: { params: Params }) {
   const p = await params;
-  const { site, locale, dict } = await getCtx(Promise.resolve(p));
+  const { site, locale, dict, base } = await getCtx(Promise.resolve(p));
   const data = await getAlbum(site, decodeURIComponent(p.slug));
   if (!data) notFound();
 
@@ -35,7 +35,7 @@ export default async function AlbumPage({ params }: { params: Params }) {
     <>
       <PageHeader title={tr(album.title, locale)} subtitle={tr(album.description, locale)} />
       <div className="container-page space-y-10 py-6 sm:py-8">
-        <Link href={`/${locale}/gallery`} className="link inline-flex items-center text-[15px] font-medium">
+        <Link href={`${base}/gallery`} className="link inline-flex items-center text-[15px] font-medium">
           <Icon name="chevron-left" className="h-5 w-5" strokeWidth={2.2} />
           {dict.nav.gallery}
         </Link>

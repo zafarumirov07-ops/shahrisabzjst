@@ -2,7 +2,7 @@ import Link from 'next/link';
 import Icon, { type IconName } from '@/components/Icon';
 import type { Locale } from '@/lib/i18n/config';
 import type { Dict } from '@/lib/i18n/dictionaries';
-import { siteUrl, type Site } from '@/lib/site';
+import { homeOf, siteUrl, type Site } from '@/lib/site';
 import A11yPanel from './A11yPanel';
 import LocaleSwitcher from './LocaleSwitcher';
 import MobileMenu from './MobileMenu';
@@ -26,7 +26,7 @@ export function LogoMark({ className = 'h-10 w-10' }: { className?: string }) {
 
 /** Menyu qisqa: 5 tagacha bo'lim, qolganlari ochiladigan guruhlar ichida. "Ta'lim sifati" doim ko'rinib turadi. */
 export function buildNav(site: Site, locale: Locale, dict: Dict): NavGroup[] {
-  const base = `/${locale}`;
+  const base = homeOf(site, locale);
   const media: NavGroup = {
     label: dict.nav.media,
     icon: 'newspaper',
@@ -72,31 +72,54 @@ export function flatNav(groups: NavGroup[]): NavLeaf[] {
 
 export default function Header({ site, locale, dict }: { site: Site; locale: Locale; dict: Dict }) {
   const groups = buildNav(site, locale, dict);
-  const title = site === 'talimsifati' ? dict.qualitySiteName : dict.siteShort;
+  const base = homeOf(site, locale);
+  const isQuality = site === 'talimsifati';
 
   return (
     <header className="sticky top-0 z-40 px-3 pt-3 sm:px-5 lg:px-8 2xl:px-12">
-      <div className="glass mx-auto flex max-w-[1920px] items-center justify-between gap-3 rounded-full py-1.5 pl-2 pr-1.5 text-white shadow-ios-lg ring-1 ring-white/10 sm:pl-3 sm:pr-2">
-        <Link href={`/${locale}`} className="flex min-w-0 items-center gap-2.5" aria-label={dict.siteName}>
-          <LogoMark className="h-10 w-10 sm:h-11 sm:w-11" />
-          <span className="min-w-0 leading-tight">
-            <span className="block truncate text-[14px] font-extrabold tracking-tight sm:text-[15px]">{title}</span>
-            <span className="hidden truncate text-[11.5px] text-white/65 sm:block">
-              {site === 'talimsifati' ? dict.siteShort : 'Shahrisabz'}
+      {/* Texnikum nomi doim to'liq ko'rinadi: kerak bo'lsa ikki qatorga o'raladi.
+          lg..2xl oralig'ida menyu ikkinchi qatorga tushadi, 2xl dan boshlab hammasi bir qatorda. */}
+      <div className="glass mx-auto flex max-w-[1920px] flex-wrap items-center justify-between gap-x-3 gap-y-1.5 rounded-[1.75rem] py-2 pl-2 pr-2 text-white shadow-ios-lg ring-1 ring-white/10 sm:pl-3 2xl:flex-nowrap 2xl:rounded-full 2xl:py-1.5">
+        <Link href={base} className="flex min-w-0 flex-1 items-center gap-2.5 2xl:flex-none" aria-label={dict.siteName}>
+          <LogoMark className="h-10 w-10 sm:h-12 sm:w-12" />
+          <span className="min-w-0">
+            {isQuality && (
+              <span className="block text-[13px] font-extrabold leading-tight tracking-tight sm:text-[15px]">
+                {dict.qualitySiteName}
+              </span>
+            )}
+            <span
+              className={
+                isQuality
+                  ? 'block text-[10.5px] leading-snug text-white/70 sm:text-[12px] 2xl:max-w-[20rem]'
+                  : 'block text-[12px] font-extrabold leading-[1.2] tracking-tight sm:text-[14.5px] 2xl:max-w-[20rem]'
+              }
+            >
+              {dict.siteName}
             </span>
           </span>
         </Link>
 
-        <NavLinks groups={groups} />
+        <div className="order-last hidden w-full justify-center lg:flex 2xl:order-none 2xl:w-auto">
+          <NavLinks groups={groups} />
+        </div>
 
         <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-          <LocaleSwitcher locale={locale} />
+          <div className="hidden sm:block">
+            <LocaleSwitcher locale={locale} />
+          </div>
           <A11yPanel labels={dict.a11y} />
-          <Link href={`/${locale}/contact`} className="btn hidden !px-5 !py-2.5 sm:inline-flex">
+          <Link href={`${base}/contact`} className="btn hidden !px-5 !py-2.5 sm:inline-flex">
             {dict.home.contactCta}
             <Icon name="arrow-up-right" className="h-4 w-4" strokeWidth={2.2} />
           </Link>
-          <MobileMenu groups={groups} title={dict.nav.menu} cta={{ href: `/${locale}/contact`, label: dict.home.contactCta }} />
+          <MobileMenu
+            groups={groups}
+            title={dict.nav.menu}
+            locale={locale}
+            languageLabel={dict.common.language}
+            cta={{ href: `${base}/contact`, label: dict.home.contactCta }}
+          />
         </div>
       </div>
     </header>

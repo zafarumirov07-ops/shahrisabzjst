@@ -2,7 +2,7 @@ import type { Locale } from './config';
 
 const uz = {
   siteName: "Shahrisabz Abu Ali ibn Sino nomidagi jamoat salomatligi texnikumi",
-  siteShort: "Abu Ali ibn Sino texnikumi",
+  siteShort: "Shahrisabz Abu Ali ibn Sino nomidagi jamoat salomatligi texnikumi",
   qualitySiteName: "Ta'lim sifati bo'limi",
   tagline: "Sog'lom avlod — kelajak poydevori",
   nav: {
@@ -150,7 +150,7 @@ export type Dict = typeof uz;
 
 const ru: Dict = {
   siteName: 'Шахрисабзский техникум общественного здоровья имени Абу Али ибн Сино',
-  siteShort: 'Техникум имени Абу Али ибн Сино',
+  siteShort: 'Шахрисабзский техникум общественного здоровья имени Абу Али ибн Сино',
   qualitySiteName: 'Отдел качества образования',
   tagline: 'Здоровое поколение — основа будущего',
   nav: {
@@ -296,7 +296,7 @@ const ru: Dict = {
 
 const en: Dict = {
   siteName: 'Shahrisabz Abu Ali ibn Sino Public Health Technical School',
-  siteShort: 'Abu Ali ibn Sino Technical School',
+  siteShort: 'Shahrisabz Abu Ali ibn Sino Public Health Technical School',
   qualitySiteName: 'Education Quality Department',
   tagline: 'A healthy generation is the foundation of the future',
   nav: {

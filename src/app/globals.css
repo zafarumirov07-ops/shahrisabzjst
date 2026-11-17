@@ -105,8 +105,8 @@ body {
 .anim-pop { animation: pop-in 0.18s ease-out; transform-origin: top right; }
 
 /* Scroll bilan paydo bo'ladigan bloklar (Reveal komponenti). JS yo'q bo'lsa hammasi ko'rinib turadi */
-.js .reveal { opacity: 0; will-change: transform, opacity; }
-.js .reveal.in { animation-duration: 0.85s; animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); animation-fill-mode: forwards; }
+.js .reveal:not(.in) { opacity: 0; }
+.js .reveal.in { animation-duration: 0.85s; animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); animation-fill-mode: both; }
 .js .reveal.in[data-anim='up'] { animation-name: rise; }
 .js .reveal.in[data-anim='left'] { animation-name: slide-left; }
 .js .reveal.in[data-anim='right'] { animation-name: slide-right; }

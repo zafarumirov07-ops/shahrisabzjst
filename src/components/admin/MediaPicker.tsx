@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { listMedia } from '@/app/admin/actions';
 import Icon from '@/components/Icon';
 import { uploadFile, type MediaRow } from '@/lib/admin/upload';
@@ -46,7 +47,7 @@ export function MediaTile({ item, selected, onClick }: { item: MediaRow; selecte
 }
 
 /** Media kutubxonasidan tanlash yoki yangi fayl yuklash oynasi. */
-export default function MediaPicker({
+function MediaPickerInner({
   kinds,
   multiple = false,
   onSelect,
@@ -183,4 +184,11 @@ export default function MediaPicker({
       </div>
     </div>
   );
+}
+
+/** Oyna document.body ga chiqariladi (ota elementlardagi transform/filter uni qamab qo'ymasligi uchun) */
+export default function MediaPicker(props: Parameters<typeof MediaPickerInner>[0]) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  return mounted ? createPortal(<MediaPickerInner {...props} />, document.body) : null;
 }
