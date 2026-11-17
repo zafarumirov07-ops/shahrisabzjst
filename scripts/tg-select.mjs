@@ -144,7 +144,12 @@ function clean(line) {
       .replace(/([a-z])([.!?])([A-Z][a-z])/g, '$1$2 $3'),
   );
   // Qalin (**) bo'laklar atrofida yopishib qolgan so'zlarni ajratish
-  t = t.replace(/\*\*([^*\n]+?)\*\*/g, ' **$1** ').replace(/\s+([.,;:!?)”])/g, '$1').replace(/([(“])\s+/g, '$1');
+  // (qalin belgisi ichidagi bosh/oxirgi bo'shliq olib tashlanadi, aks holda Markdown uni qalin deb tanimaydi)
+  t = t
+    .replace(/\*\*([^*\n]+?)\*\*/g, (_, inner) => (inner.trim() ? ` **${inner.trim()}** ` : ' '))
+    .replace(/\s+([.,;:!?)”])/g, '$1')
+    .replace(/([(“])\s+/g, '$1')
+    .replace(/(^|\s)_(?=[A-Za-z])/g, '$1— '); // "SPORT _BESH" kabi qoldiq pastki chiziqlar
   // Oxiridagi heshteglar
   t = t.replace(/(\s+#[\w‘’']+)+\s*$/g, '');
   // Juft bo'lmagan ** belgilarini olib tashlash
