@@ -92,7 +92,7 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
                 <span className="font-semibold">{TABLES[row.table_name as string] ?? row.table_name}</span>
                 {subject && <span className="truncate text-muted">“{subject}”</span>}
                 <span className="ml-auto whitespace-nowrap text-xs text-muted">
-                  {formatDateTime(row.at as string, 'uz')} · {(row.user_email as string) || 'tizim'}
+                  {formatDateTime(row.at as string, 'uz')} · {(row.user_email as string) || 'admin'}
                 </span>
               </div>
               {diff.length > 0 && (

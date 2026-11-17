@@ -1,7 +1,7 @@
 'use client';
 
+import { createUploadTarget, registerMedia } from '@/app/admin/actions';
 import { createClient } from '@/lib/supabase/client';
-import { slugify } from '@/lib/utils';
 
 export type MediaRow = {
   id: string;
@@ -45,6 +45,10 @@ async function compressImage(file: File): Promise<File> {
   }
 }
 
+/**
+ * Yuklash tartibi: server imzolangan manzil beradi, fayl brauzerdan to'g'ridan-to'g'ri Supabase Storage'ga ketadi
+ * (Vercel hajm chegarasiga tushmaydi), so'ng server kutubxonaga yozadi.
+ */
 export async function uploadFile(original: File): Promise<MediaRow> {
   const file = await compressImage(original);
   if (file.size > MAX_BYTES) {
@@ -53,39 +57,23 @@ export async function uploadFile(original: File): Promise<MediaRow> {
     );
   }
 
-  const supabase = createClient();
-  const now = new Date();
-  const ext = (file.name.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin';
-  const base = slugify(file.name.replace(/\.[^.]+$/, '')) || 'file';
-  const path = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${crypto
-    .randomUUID()
-    .slice(0, 8)}-${base}.${ext}`;
+  const target = await createUploadTarget(file.name, file.type, file.size);
+  if (target.error || !target.path || !target.token) throw new Error(target.error ?? 'Yuklash manzili olinmadi');
 
-  const { error: upErr } = await supabase.storage
-    .from('media')
-    .upload(path, file, { cacheControl: '31536000', contentType: file.type || undefined, upsert: false });
+  const { error: upErr } = await createClient()
+    .storage.from('media')
+    .uploadToSignedUrl(target.path, target.token, file, { contentType: file.type || undefined });
   if (upErr) throw new Error(`Yuklashda xatolik: ${upErr.message}`);
 
-  const { data: pub } = supabase.storage.from('media').getPublicUrl(path);
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const { data, error } = await supabase
-    .from('media')
-    .insert({
-      path,
-      url: pub.publicUrl,
-      name: original.name,
-      mime_type: file.type || null,
-      size_bytes: file.size,
-      kind: mediaKindOf(file.type || ''),
-      uploaded_by: user?.id ?? null,
-    })
-    .select('*')
-    .single();
-  if (error || !data) throw new Error(`Kutubxonaga yozishda xatolik: ${error?.message}`);
-  return data as MediaRow;
+  const reg = await registerMedia({
+    path: target.path,
+    name: original.name,
+    mime_type: file.type,
+    size_bytes: file.size,
+    kind: mediaKindOf(file.type || ''),
+  });
+  if (reg.error || !reg.row) throw new Error(reg.error ?? 'Kutubxonaga yozib bo‘lmadi');
+  return reg.row;
 }
 
 export function toLocalInput(iso: string | null | undefined): string {

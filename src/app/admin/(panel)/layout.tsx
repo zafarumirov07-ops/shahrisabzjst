@@ -36,15 +36,12 @@ export default async function PanelLayout({ children }: { children: ReactNode })
     );
   }
   if (profile.role === 'super_admin') {
-    nav.push(
-      { href: '/admin/users', label: 'Foydalanuvchilar', icon: 'user' },
-      { href: '/admin/audit', label: 'Tahrir tarixi', icon: 'history' },
-    );
+    nav.push({ href: '/admin/audit', label: 'Tahrir tarixi', icon: 'history' });
   }
 
   return (
     <div className="min-h-screen lg:flex">
-      <aside className="glass border-b border-line lg:sticky lg:top-0 lg:h-screen lg:w-72 lg:shrink-0 lg:overflow-y-auto lg:border-b-0 lg:border-r">
+      <aside className="border-b border-line bg-surface lg:sticky lg:top-0 lg:h-screen lg:w-72 lg:shrink-0 lg:overflow-y-auto lg:border-b-0 lg:border-r">
         <div className="flex items-center gap-3 p-4 lg:p-5">
           <LogoMark className="h-10 w-10" />
           <div className="leading-tight">

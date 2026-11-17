@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import '../globals.css';
+import { sans } from '@/lib/fonts';
 
 export const metadata: Metadata = {
   title: { default: 'Admin panel', template: '%s | Admin panel' },
@@ -12,7 +13,7 @@ export const dynamic = 'force-dynamic';
 
 export default function AdminRootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="uz" suppressHydrationWarning>
+    <html lang="uz" className={sans.variable} suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>

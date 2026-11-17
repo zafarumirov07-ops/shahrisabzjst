@@ -1,9 +1,8 @@
 import { redirect } from 'next/navigation';
-import { SUPABASE_CONFIGURED } from '@/lib/supabase/env';
-import { createClient } from '@/lib/supabase/server';
-import type { Site } from '@/lib/site';
-
+import { adminLoginConfigured, readSession } from '@/lib/admin/session';
 import type { AppRole } from '@/lib/admin/roles';
+import { adminDbConfigured, createAdminClient } from '@/lib/supabase/admin';
+import type { Site } from '@/lib/site';
 
 export { ROLE_LABELS, type AppRole } from '@/lib/admin/roles';
 
@@ -27,30 +26,17 @@ export function isStaffRole(role: AppRole): boolean {
 
 /** Kirmagan foydalanuvchi /admin/login ga yo'naltiriladi. */
 export async function getSessionProfile() {
-  // Supabase hali ulanmagan bo'lsa, login sahifasi tushuntirish ko'rsatadi
-  if (!SUPABASE_CONFIGURED) {
-    redirect('/admin/login');
-  }
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect('/admin/login');
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('id, email, full_name, role')
-    .eq('id', user.id)
-    .maybeSingle();
+  if (!adminLoginConfigured() || !adminDbConfigured()) redirect('/admin/login');
+  const session = await readSession();
+  if (!session) redirect('/admin/login');
 
   return {
-    supabase,
-    user,
-    profile: (profile ?? { id: user.id, email: user.email ?? null, full_name: null, role: 'pending' }) as Profile,
+    supabase: createAdminClient(),
+    user: { id: session.login },
+    profile: { id: session.login, email: session.login, full_name: session.login, role: session.role } as Profile,
   };
 }
 
-/** Faqat xodimlar (pending emas) uchun. Huquqsiz foydalanuvchi bosh sahifaga qaytariladi. */
 export async function requireStaff() {
   const ctx = await getSessionProfile();
   if (!isStaffRole(ctx.profile.role)) redirect('/admin');

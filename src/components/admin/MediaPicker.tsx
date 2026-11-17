@@ -1,8 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { listMedia } from '@/app/admin/actions';
 import Icon from '@/components/Icon';
-import { createClient } from '@/lib/supabase/client';
 import { uploadFile, type MediaRow } from '@/lib/admin/upload';
 import { fileSizeLabel } from '@/lib/utils';
 
@@ -67,15 +67,9 @@ export default function MediaPicker({
 
   const load = useCallback(async () => {
     setLoading(true);
-    const db = createClient();
-    const { data, error: err } = await db
-      .from('media')
-      .select('*')
-      .eq('kind', filter)
-      .order('created_at', { ascending: false })
-      .limit(120);
-    if (err) setError(err.message);
-    setItems((data ?? []) as MediaRow[]);
+    const res = await listMedia(filter);
+    if (res.error) setError(res.error);
+    setItems(res.rows);
     setLoading(false);
   }, [filter]);
 

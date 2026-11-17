@@ -5,6 +5,8 @@ import { tr, type Locale } from '@/lib/i18n/config';
 import type { Dict } from '@/lib/i18n/dictionaries';
 import type { EventRow, Post, Staff } from '@/lib/types';
 import { formatDate, monthDay } from '@/lib/utils';
+import CountUp from './CountUp';
+import Reveal from './Reveal';
 
 export const SOCIAL_ICON: Record<string, IconName> = {
   telegram: 'telegram',
@@ -17,30 +19,46 @@ export function SectionHeading({
   title,
   href,
   hrefLabel,
+  badge,
 }: {
   title: string;
   href?: string;
   hrefLabel?: string;
+  badge?: string;
 }) {
   return (
-    <div className="mb-4 flex items-end justify-between gap-4">
-      <h2 className="section-title">{title}</h2>
+    <div className="mb-6 flex flex-wrap items-end justify-between gap-4 sm:mb-8">
+      <div>
+        {badge && <span className="badge mb-3">{badge}</span>}
+        <h2 className="section-title">{title}</h2>
+      </div>
       {href && (
-        <Link href={href} className="link inline-flex shrink-0 items-center text-[15px] font-medium">
+        <Link
+          href={href}
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[var(--accent-soft)] px-4 py-2 text-[14px] font-bold text-accent transition hover:gap-2.5"
+        >
           {hrefLabel}
-          <Icon name="chevron-right" className="h-4 w-4" strokeWidth={2.2} />
+          <Icon name="arrow-right" className="h-4 w-4" strokeWidth={2.2} />
         </Link>
       )}
     </div>
   );
 }
 
-/** iOS "large title" uslubidagi sahifa sarlavhasi */
+/** Ichki sahifalar tepasidagi gradient lavha */
 export function PageHeader({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
-    <div className="container-page pb-2 pt-8 sm:pt-12">
-      <h1 className="large-title">{title}</h1>
-      {subtitle && <p className="mt-2 max-w-3xl text-[17px] text-muted">{subtitle}</p>}
+    <div className="container-page pt-3 sm:pt-4">
+      <div
+        className="relative isolate overflow-hidden rounded-ios-lg px-6 py-10 text-white sm:px-12 sm:py-14"
+        style={{ background: 'linear-gradient(135deg,#031a30 0%,#06335a 55%,#0a5f86 100%)' }}
+      >
+        <div className="blob absolute -right-16 -top-24 -z-10 h-72 w-72 rounded-full bg-sky/30 blur-3xl" />
+        <div className="blob absolute -bottom-24 left-1/4 -z-10 h-64 w-64 rounded-full bg-leaf/25 blur-3xl" style={{ animationDelay: '-6s' }} />
+        <h1 className="large-title hero-in max-w-4xl">{title}</h1>
+        {subtitle && <p className="hero-in mt-3 max-w-3xl text-[17px] text-white/80" style={{ animationDelay: '120ms' }}>{subtitle}</p>}
+        <span className="hero-in mt-6 block h-1.5 w-20 rounded-full bg-gradient-to-r from-sky to-leaf" style={{ animationDelay: '220ms' }} />
+      </div>
     </div>
   );
 }
@@ -60,7 +78,7 @@ export function PostCard({ post, locale, dict }: { post: Post; locale: Locale; d
   const section = post.kind === 'announcement' ? 'announcements' : 'news';
   const href = `/${locale}/${section}/${post.slug}`;
   return (
-    <article className="card group flex flex-col overflow-hidden transition duration-300 hover:-translate-y-0.5 hover:shadow-ios-lg">
+    <article className="card card-hover group flex flex-col overflow-hidden">
       <Link href={href} className="relative block aspect-[16/10] overflow-hidden bg-surface2">
         {post.cover_url ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -71,7 +89,7 @@ export function PostCard({ post, locale, dict }: { post: Post; locale: Locale; d
             className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#d6e9ff] to-[#d9f5e0] text-accent">
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#cdeefd] to-[#d4f7df] text-accent">
             <Icon name="cross" className="h-12 w-12 opacity-60" strokeWidth={1.4} />
           </div>
         )}
@@ -226,19 +244,24 @@ export function Grid({ children, cols = 3 }: { children: ReactNode; cols?: 2 | 3
   return <div className={`grid gap-4 sm:gap-5 ${map[cols]}`}>{children}</div>;
 }
 
-/** Ko'rsatkichlar bloki (talabalar, o'qituvchilar...) */
-export function StatsStrip({ items }: { items: Array<{ value: string; label: string; icon: IconName }> }) {
+/** Ko'rsatkichlar: tepada yashil chiziq, raqamlar ekranga kirganda sanab chiqiladi */
+export function StatsStrip({ items }: { items: Array<{ value: string; suffix?: string; label: string; icon: IconName }> }) {
   if (items.length === 0) return null;
   return (
-    <dl className="card grid grid-cols-2 gap-y-6 px-4 py-6 sm:grid-cols-4 sm:px-6">
-      {items.map((s) => (
-        <div key={s.label} className="flex flex-col items-center text-center">
-          <span className="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--accent-soft)] text-accent">
-            <Icon name={s.icon} className="h-5 w-5" />
-          </span>
-          <dd className="text-3xl font-bold tracking-tighter2">{s.value}</dd>
-          <dt className="mt-0.5 text-[13px] font-medium text-muted">{s.label}</dt>
-        </div>
+    <dl className="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-4">
+      {items.map((s, i) => (
+        <Reveal key={s.label} delay={i * 110}>
+          <div className="border-t-[3px] pt-5" style={{ borderColor: 'var(--green)' }}>
+            <dd className="flex items-baseline gap-1 text-[2.6rem] font-extrabold leading-none tracking-tighter2 sm:text-6xl">
+              <CountUp value={s.value} />
+              {s.suffix && <span className="text-2xl text-green sm:text-4xl">{s.suffix}</span>}
+            </dd>
+            <dt className="mt-3 flex items-center gap-2 text-[14px] font-semibold text-muted">
+              <Icon name={s.icon} className="h-[18px] w-[18px] text-accent" />
+              {s.label}
+            </dt>
+          </div>
+        </Reveal>
       ))}
     </dl>
   );

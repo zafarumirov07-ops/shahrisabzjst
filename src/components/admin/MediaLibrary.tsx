@@ -1,8 +1,8 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import { deleteMedia } from '@/app/admin/actions';
 import Icon from '@/components/Icon';
-import { createClient } from '@/lib/supabase/client';
 import { uploadFile, type MediaRow } from '@/lib/admin/upload';
 import { fileSizeLabel } from '@/lib/utils';
 
@@ -32,13 +32,8 @@ export default function MediaLibrary({ initial }: { initial: MediaRow[] }) {
 
   async function remove(item: MediaRow) {
     if (!window.confirm(`"${item.name}" o‘chirilsinmi? Bu fayl ishlatilgan joylarda rasm ko‘rinmay qoladi.`)) return;
-    const db = createClient();
-    // Avval jadval yozuvi o'chiriladi (RLS: faqat o'zi yuklagan yoki bosh admin), keyin fayl
-    const { data, error: dbErr } = await db.from('media').delete().eq('id', item.id).select('id');
-    if (dbErr) return setError(dbErr.message);
-    if (!data || data.length === 0) return setError("Bu faylni o'chirish huquqingiz yo'q (faqat o'zingiz yuklagan fayllarni o'chira olasiz)");
-    const { error: stErr } = await db.storage.from('media').remove([item.path]);
-    if (stErr) setError(`Yozuv o'chirildi, lekin fayl omborda qoldi: ${stErr.message}`);
+    const res = await deleteMedia(item.id);
+    if (res.error) return setError(res.error);
     setItems((cur) => cur.filter((i) => i.id !== item.id));
   }
 

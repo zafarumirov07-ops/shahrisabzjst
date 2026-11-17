@@ -96,7 +96,7 @@ export default function A11yPanel({
         aria-expanded={open}
         aria-label={labels.title}
         title={labels.title}
-        className="flex h-8 w-8 items-center justify-center rounded-full bg-surface2 text-fg transition active:scale-95"
+        className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25 active:scale-95"
       >
         <Icon name="accessibility" className="h-[18px] w-[18px]" />
       </button>
@@ -104,8 +104,8 @@ export default function A11yPanel({
         <div
           role="dialog"
           aria-label={labels.title}
-          className="anim-pop absolute right-0 z-50 mt-2.5 w-[19rem] rounded-ios bg-surface p-4 shadow-ios-lg"
-          style={{ border: '0.5px solid var(--line)' }}
+          className="anim-pop absolute right-0 z-50 mt-3 w-[19rem] rounded-ios bg-surface p-4 text-fg shadow-ios-lg"
+          style={{ border: '1px solid var(--line)' }}
         >
           <p className="mb-3 text-[15px] font-semibold">{labels.title}</p>
 

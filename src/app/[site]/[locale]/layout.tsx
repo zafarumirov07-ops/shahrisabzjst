@@ -6,11 +6,12 @@ import Header from '@/components/site/Header';
 import ViewTracker from '@/components/site/ViewTracker';
 import { getCtx, type SiteParams } from '@/lib/ctx';
 import { getSettings } from '@/lib/data';
+import { sans } from '@/lib/fonts';
 import { LOCALES } from '@/lib/i18n/config';
 import { ROOT_DOMAIN } from '@/lib/site';
 
 // Brauzer saqlangan sozlamalarni (shrift, kontrast, qorong'u rejim) sahifa chizilishidan oldin qo'llaydi
-const themeScript = `(function(){try{var s=JSON.parse(localStorage.getItem('a11y')||'{}');var e=document.documentElement;if(s.fs>0)e.setAttribute('data-fs',s.fs);if(s.contrast)e.setAttribute('data-contrast','high');if(s.dark)e.setAttribute('data-theme','dark');}catch(_){}})();`;
+const themeScript = `(function(){document.documentElement.classList.add('js');try{var s=JSON.parse(localStorage.getItem('a11y')||'{}');var e=document.documentElement;if(s.fs>0)e.setAttribute('data-fs',s.fs);if(s.contrast)e.setAttribute('data-contrast','high');if(s.dark)e.setAttribute('data-theme','dark');}catch(_){}})();`;
 
 // Har ikkala sayt va uchala til oldindan tayyorlanadi; qolgan sahifalar birinchi so'rovda keshlanadi (ISR)
 export function generateStaticParams() {
@@ -41,7 +42,7 @@ export default async function SiteLayout({
   const settings = await getSettings(site);
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale} className={sans.variable} suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />

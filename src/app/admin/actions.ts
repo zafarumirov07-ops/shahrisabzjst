@@ -1,15 +1,12 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import {
-  allowedSites,
-  getSessionProfile,
-  requireStaff,
-  requireSuperAdmin,
-  type AppRole,
-} from '@/lib/admin/auth';
+import { allowedSites, requireStaff } from '@/lib/admin/auth';
+import { createSession, destroySession, verifyCredentials } from '@/lib/admin/session';
 import { RESOURCES, SOCIAL_KEYS, type Field } from '@/lib/admin/resources';
+import type { MediaRow } from '@/lib/admin/upload';
 import { LOCALES } from '@/lib/i18n/config';
 import { slugify } from '@/lib/utils';
 
@@ -94,7 +91,7 @@ export async function saveRecord(
   values: Values,
   attachments: AttachmentInput[] = [],
 ): Promise<ActionResult> {
-  const { supabase, user, profile } = await requireStaff();
+  const { supabase, profile } = await requireStaff();
   const res = RESOURCES[resourceKey];
   if (!res) return { error: "Noma'lum bo'lim" };
 
@@ -150,8 +147,7 @@ export async function saveRecord(
         return { error: "Saqlab bo'lmadi: yozuv topilmadi yoki ruxsatingiz yo'q" };
       } else lastError = null;
     } else {
-      const insertPayload = res.setCreatedBy ? { ...payload, created_by: user.id } : payload;
-      const { data, error } = await supabase.from(res.table).insert(insertPayload).select('id').single();
+      const { data, error } = await supabase.from(res.table).insert(payload).select('id').single();
       if (error) lastError = error;
       else {
         recordId = data.id as string;
@@ -225,21 +221,122 @@ export async function deleteRecord(resourceKey: string, id: string): Promise<Act
 }
 
 export async function signOut() {
-  const { supabase } = await getSessionProfile();
-  await supabase.auth.signOut();
+  await destroySession();
   redirect('/admin/login');
 }
 
-const ROLES: AppRole[] = ['pending', 'editor', 'quality_editor', 'super_admin'];
+// ---------- Kirish (login/parol Vercel env dan) ----------
+export type LoginState = { error?: string };
 
-export async function updateUserRole(userId: string, role: string): Promise<ActionResult> {
-  const { supabase, user } = await requireSuperAdmin();
-  if (!ROLES.includes(role as AppRole)) return { error: "Noto'g'ri rol" };
-  if (userId === user.id) return { error: "O'z rolingizni o'zgartira olmaysiz (tizimdan chiqib ketmaslik uchun)" };
+// Oddiy urinishlarni cheklash (bitta server nusxasi ichida): 10 daqiqada 8 ta xato urinish
+const attempts = new Map<string, { count: number; first: number }>();
 
-  const { data, error } = await supabase.from('profiles').update({ role }).eq('id', userId).select('id');
+export async function login(_prev: LoginState, formData: FormData): Promise<LoginState> {
+  const h = await headers();
+  const ip = (h.get('x-forwarded-for') ?? 'local').split(',')[0].trim();
+  const now = Date.now();
+  const rec = attempts.get(ip);
+  if (rec && now - rec.first < 10 * 60 * 1000 && rec.count >= 8) {
+    return { error: "Juda ko'p urinish. 10 daqiqadan keyin qayta urinib ko'ring." };
+  }
+
+  const loginName = String(formData.get('login') ?? '');
+  const password = String(formData.get('password') ?? '');
+  const user = verifyCredentials(loginName, password);
+
+  if (!user) {
+    const fresh = rec && now - rec.first < 10 * 60 * 1000 ? rec : { count: 0, first: now };
+    attempts.set(ip, { count: fresh.count + 1, first: fresh.first });
+    await new Promise((r) => setTimeout(r, 700)); // brute-force ni sekinlashtirish
+    return { error: "Login yoki parol noto'g'ri" };
+  }
+
+  attempts.delete(ip);
+  await createSession(user);
+  redirect('/admin');
+}
+
+// ---------- Media: serverdan imzolangan yuklash (brauzerda Supabase sessiyasi yo'q) ----------
+const MAX_UPLOAD = 50 * 1024 * 1024;
+const ALLOWED_MIME = [
+  'image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif',
+  'video/mp4', 'video/webm', 'video/quicktime',
+  'application/pdf', 'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.ms-powerpoint',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'application/zip',
+];
+
+export async function createUploadTarget(
+  fileName: string,
+  mime: string,
+  size: number,
+): Promise<{ error?: string; path?: string; token?: string }> {
+  const { supabase } = await requireStaff();
+  if (size > MAX_UPLOAD) return { error: 'Fayl 50 MB dan katta' };
+  if (!ALLOWED_MIME.includes(mime)) return { error: `Bu fayl turi (${mime || 'noma‘lum'}) ruxsat etilmagan` };
+
+  const now = new Date();
+  const ext = (fileName.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin';
+  const base = slugify(fileName.replace(/\.[^.]+$/, '')) || 'file';
+  const path = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${Math.random()
+    .toString(36)
+    .slice(2, 10)}-${base}.${ext}`;
+
+  const { data, error } = await supabase.storage.from('media').createSignedUploadUrl(path);
+  if (error || !data) return { error: `Yuklash manzilini olishda xatolik: ${error?.message}` };
+  return { path, token: data.token };
+}
+
+export async function registerMedia(input: {
+  path: string;
+  name: string;
+  mime_type: string;
+  size_bytes: number;
+  kind: 'image' | 'video' | 'file';
+}): Promise<{ error?: string; row?: MediaRow }> {
+  const { supabase } = await requireStaff();
+  if (!/^\d{4}\/\d{2}\/[a-z0-9-]+\.[a-z0-9]+$/.test(input.path)) return { error: "Noto'g'ri fayl yo'li" };
+
+  const { data: pub } = supabase.storage.from('media').getPublicUrl(input.path);
+  const { data, error } = await supabase
+    .from('media')
+    .insert({
+      path: input.path,
+      url: pub.publicUrl,
+      name: input.name.slice(0, 200),
+      mime_type: input.mime_type || null,
+      size_bytes: input.size_bytes,
+      kind: input.kind,
+    })
+    .select('*')
+    .single();
+  if (error || !data) return { error: `Kutubxonaga yozishda xatolik: ${error?.message}` };
+  return { row: data as MediaRow };
+}
+
+export async function listMedia(kind: 'image' | 'video' | 'file'): Promise<{ error?: string; rows: MediaRow[] }> {
+  const { supabase } = await requireStaff();
+  const { data, error } = await supabase
+    .from('media')
+    .select('*')
+    .eq('kind', kind)
+    .order('created_at', { ascending: false })
+    .limit(120);
+  if (error) return { error: error.message, rows: [] };
+  return { rows: (data ?? []) as MediaRow[] };
+}
+
+export async function deleteMedia(id: string): Promise<ActionResult> {
+  const { supabase } = await requireStaff();
+  const { data: row } = await supabase.from('media').select('path').eq('id', id).maybeSingle();
+  if (!row) return { error: 'Fayl topilmadi' };
+  const { error } = await supabase.from('media').delete().eq('id', id);
   if (error) return { error: error.message };
-  if (!data || data.length === 0) return { error: 'Foydalanuvchi topilmadi' };
+  await supabase.storage.from('media').remove([row.path as string]);
   return { ok: true };
 }
 
