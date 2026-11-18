@@ -2,37 +2,65 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Icon from '@/components/Icon';
-import { getPostBySlug, getPosts, PAGE_SIZE } from '@/lib/data';
+import { getPostBySlug, getPosts, PAGE_SIZE, searchContent } from '@/lib/data';
 import { tr } from '@/lib/i18n/config';
 import type { Ctx } from '@/lib/ctx';
-import type { PostMedia } from '@/lib/types';
+import type { Post, PostMedia, SearchHit } from '@/lib/types';
 import { formatDate, toEmbedUrl } from '@/lib/utils';
 import Markdown from './Markdown';
 import MediaGallery from './MediaGallery';
-import { EmptyState, Grid, PageHeader, Pagination, PostCard } from './ui';
+import { EmptyState, Grid, PageHeader, Pagination, PostCard, SearchForm } from './ui';
 import ViewTracker from './ViewTracker';
 
 type Kind = 'news' | 'announcement';
+
+/** Qidiruv natijalarini PostCard ko'rsatadigan Post shakliga keltiradi */
+async function searchPosts(site: Ctx['site'], kind: Kind, q: string, page: number): Promise<{ rows: Post[]; total: number }> {
+  const { rows, total } = await searchContent({ site, q, types: [kind], page, limit: PAGE_SIZE });
+  const posts = rows.map(
+    (h: SearchHit) =>
+      ({
+        id: h.id,
+        site,
+        kind,
+        slug: h.slug,
+        title: h.title,
+        excerpt: h.snippet,
+        body: {},
+        cover_url: h.cover_url,
+        published_at: h.at,
+        pinned: false,
+        view_count: 0,
+      }) as unknown as Post,
+  );
+  return { rows: posts, total };
+}
 
 export async function PostListPage({
   ctx,
   kind,
   page,
+  q = '',
 }: {
   ctx: Ctx;
   kind: Kind;
   page: number;
+  q?: string;
 }) {
   const { site, locale, dict, base } = ctx;
   const section = kind === 'news' ? 'news' : 'announcements';
-  const { rows, total } = await getPosts({ site, kind, page });
+  const query = q.trim().slice(0, 80);
+  const { rows, total } = query
+    ? await searchPosts(site, kind, query, page)
+    : await getPosts({ site, kind, page });
 
   return (
     <>
       <PageHeader title={kind === 'news' ? dict.nav.news : dict.nav.announcements} />
       <div className="container-page py-6 sm:py-8">
+        <SearchForm action={`${base}/${section}`} q={query} dict={dict} className="mb-6 max-w-2xl" />
         {rows.length === 0 ? (
-          <EmptyState text={dict.common.noData} icon={kind === 'news' ? 'newspaper' : 'megaphone'} />
+          <EmptyState text={query ? dict.search.none : dict.common.noData} icon={kind === 'news' ? 'newspaper' : 'megaphone'} />
         ) : (
           <>
             <Grid>
@@ -46,6 +74,7 @@ export async function PostListPage({
               pageSize={PAGE_SIZE}
               basePath={`${base}/${section}`}
               dict={dict}
+              query={query ? { q: query } : {}}
             />
           </>
         )}

@@ -1,21 +1,27 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { EmptyState, Grid, PageHeader } from '@/components/site/ui';
+import { EmptyState, Grid, PageHeader, Pagination } from '@/components/site/ui';
 import { getCtx, type SiteParams } from '@/lib/ctx';
-import { getAlbums } from '@/lib/data';
+import { ALBUM_PAGE_SIZE, getAlbumsPage } from '@/lib/data';
 import { tr } from '@/lib/i18n/config';
 import { formatDate } from '@/lib/utils';
-
-export const revalidate = 60;
 
 export async function generateMetadata({ params }: { params: SiteParams }): Promise<Metadata> {
   const { dict } = await getCtx(params);
   return { title: dict.nav.gallery };
 }
 
-export default async function GalleryPage({ params }: { params: SiteParams }) {
+export default async function GalleryPage({
+  params,
+  searchParams,
+}: {
+  params: SiteParams;
+  searchParams: Promise<{ page?: string }>;
+}) {
   const { site, locale, dict, base } = await getCtx(params);
-  const albums = await getAlbums(site, 60);
+  const { page: pageParam } = await searchParams;
+  const page = Math.max(1, Number(pageParam) || 1);
+  const { rows: albums, total } = await getAlbumsPage({ site, page });
 
   return (
     <>
@@ -46,6 +52,7 @@ export default async function GalleryPage({ params }: { params: SiteParams }) {
             ))}
           </Grid>
         )}
+        <Pagination page={page} total={total} pageSize={ALBUM_PAGE_SIZE} basePath={`${base}/gallery`} dict={dict} />
       </div>
     </>
   );

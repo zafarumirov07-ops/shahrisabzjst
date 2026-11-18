@@ -21,11 +21,17 @@ import type {
   Post,
   PostMedia,
   Program,
+  RecentPhoto,
+  SearchHit,
+  SearchType,
   SiteSettings,
   Staff,
 } from '@/lib/types';
 
+import { searchTerms } from '@/lib/search';
+
 export const PAGE_SIZE = 9;
+export const ALBUM_PAGE_SIZE = 12;
 
 /** Supabase xatosi yoki sozlanmagan holatda sayt yiqilmasligi uchun. */
 async function safe<T>(fallback: T, fn: () => Promise<T>): Promise<T> {
@@ -250,5 +256,139 @@ export async function getSettings(site: Site): Promise<SiteSettings> {
     const out: Record<string, unknown> = {};
     for (const row of data ?? []) out[row.key as string] = row.value;
     return out as SiteSettings;
+  });
+}
+
+
+export async function getAlbumsPage(opts: {
+  site: Site;
+  page?: number;
+  limit?: number;
+}): Promise<{ rows: Album[]; total: number }> {
+  return safe({ rows: [], total: 0 }, async () => {
+    const limit = opts.limit ?? ALBUM_PAGE_SIZE;
+    const from = ((opts.page ?? 1) - 1) * limit;
+    if (DEMO) {
+      const all = demoAlbums.filter((a) => a.site === opts.site);
+      return { rows: all.slice(from, from + limit), total: all.length };
+    }
+    const db = createPublicClient();
+    if (!db) return { rows: [], total: 0 };
+    const { data, count, error } = await db
+      .from('albums')
+      .select('*', { count: 'exact' })
+      .eq('site', opts.site)
+      .eq('published', true)
+      .lte('published_at', nowIso())
+      .order('published_at', { ascending: false })
+      .range(from, from + limit - 1);
+    if (error) throw error;
+    return { rows: (data ?? []) as Album[], total: count ?? 0 };
+  });
+}
+
+/** Bosh sahifa karuseli uchun: eng yangi albomlardan bir nechtadan rasm */
+export async function getRecentPhotos(site: Site, limit = 18, perAlbum = 3): Promise<RecentPhoto[]> {
+  return safe([], async () => {
+    if (DEMO) return [];
+    const db = createPublicClient();
+    if (!db) return [];
+    const { data: albums } = await db
+      .from('albums')
+      .select('id, slug, title')
+      .eq('site', site)
+      .eq('published', true)
+      .lte('published_at', nowIso())
+      .order('published_at', { ascending: false })
+      .limit(Math.ceil(limit / perAlbum) + 2);
+    if (!albums?.length) return [];
+    const { data: items } = await db
+      .from('album_items')
+      .select('album_id, url, sort_order')
+      .in('album_id', albums.map((a) => a.id))
+      .eq('kind', 'image')
+      .order('sort_order', { ascending: true });
+    const out: RecentPhoto[] = [];
+    for (const a of albums) {
+      const mine = (items ?? []).filter((i) => i.album_id === a.id).slice(0, perAlbum);
+      for (const i of mine) out.push({ url: i.url as string, caption: a.title as RecentPhoto['caption'], albumSlug: a.slug as string });
+    }
+    return out.slice(0, limit);
+  });
+}
+
+export async function getProgramBySlug(slug: string): Promise<Program | null> {
+  return safe(null, async () => {
+    if (DEMO) return demoPrograms.find((p) => p.slug === slug) ?? null;
+    const db = createPublicClient();
+    if (!db) return null;
+    const { data } = await db.from('programs').select('*').eq('slug', slug).eq('published', true).maybeSingle();
+    return (data as Program) ?? null;
+  });
+}
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Tadbir: slug bo'yicha, slug bo'lmagan eski yozuvlar uchun id bo'yicha */
+export async function getEventByKey(site: Site, key: string): Promise<EventRow | null> {
+  return safe(null, async () => {
+    if (DEMO) return demoEvents.find((e) => e.site === site && (e.id === key || e.slug === key)) ?? null;
+    const db = createPublicClient();
+    if (!db) return null;
+    const q = db.from('events').select('*').eq('site', site).eq('published', true);
+    const { data } = await (UUID.test(key) ? q.eq('id', key) : q.eq('slug', key)).maybeSingle();
+    return (data as EventRow) ?? null;
+  });
+}
+
+export async function getEventsPage(opts: {
+  site: Site;
+  when: 'upcoming' | 'past';
+  page?: number;
+  limit?: number;
+}): Promise<{ rows: EventRow[]; total: number }> {
+  return safe({ rows: [], total: 0 }, async () => {
+    const limit = opts.limit ?? PAGE_SIZE;
+    const from = ((opts.page ?? 1) - 1) * limit;
+    if (DEMO) return { rows: [], total: 0 };
+    const db = createPublicClient();
+    if (!db) return { rows: [], total: 0 };
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    let q = db.from('events').select('*', { count: 'exact' }).eq('site', opts.site).eq('published', true);
+    q =
+      opts.when === 'upcoming'
+        ? q.gte('starts_at', startOfToday.toISOString()).order('starts_at', { ascending: true })
+        : q.lt('starts_at', startOfToday.toISOString()).order('starts_at', { ascending: false });
+    const { data, count, error } = await q.range(from, from + limit - 1);
+    if (error) throw error;
+    return { rows: (data ?? []) as EventRow[], total: count ?? 0 };
+  });
+}
+
+/** Sayt bo'yicha qidiruv (migratsiyadagi search_content funksiyasi). */
+export async function searchContent(opts: {
+  site: Site;
+  q: string;
+  types?: SearchType[];
+  page?: number;
+  limit?: number;
+}): Promise<{ rows: SearchHit[]; total: number }> {
+  return safe({ rows: [], total: 0 }, async () => {
+    const terms = searchTerms(opts.q);
+    if (terms.length === 0 || DEMO) return { rows: [], total: 0 };
+    const db = createPublicClient();
+    if (!db) return { rows: [], total: 0 };
+    const limit = opts.limit ?? PAGE_SIZE;
+    const { data, error } = await db.rpc('search_content', {
+      p_site: opts.site,
+      p_terms: terms,
+      p_types: opts.types ?? null,
+      p_limit: limit,
+      p_offset: ((opts.page ?? 1) - 1) * limit,
+    });
+    if (error) throw error;
+    const rows = (data ?? []) as Array<SearchHit & { total: number }>;
+    return { rows: rows.map(({ total: _t, ...r }) => r as SearchHit), total: Number(rows[0]?.total ?? 0) };
   });
 }

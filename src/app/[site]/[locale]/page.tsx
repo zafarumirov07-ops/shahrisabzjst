@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Icon, { type IconName } from '@/components/Icon';
+import Carousel from '@/components/site/Carousel';
 import Reveal from '@/components/site/Reveal';
 import {
   EmptyState,
@@ -12,7 +13,7 @@ import {
 } from '@/components/site/ui';
 import { getCtx, type Ctx, type SiteParams } from '@/lib/ctx';
 import {
-  getAlbums,
+  getRecentPhotos,
   getEvents,
   getPage,
   getPosts,
@@ -202,39 +203,26 @@ function QuickRow({
   );
 }
 
-function AlbumGrid({ albums, locale, base }: { albums: Awaited<ReturnType<typeof getAlbums>>; locale: Ctx['locale']; base: string }) {
+/** So'nggi albomlardan rasmlar: karusel, bosilsa albomga olib boradi */
+function PhotoCarousel({ photos, locale, base, label }: { photos: Awaited<ReturnType<typeof getRecentPhotos>>; locale: Ctx['locale']; base: string; label: string }) {
   return (
-    <Grid cols={4}>
-      {albums.map((a, i) => (
-        <Reveal key={a.id} delay={i * 90} anim="zoom">
-          <Link href={`${base}/gallery/${a.slug}`} className="card card-hover group block overflow-hidden">
-            <div className="aspect-[4/3] overflow-hidden bg-surface2">
-              {a.cover_url && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={a.cover_url}
-                  alt=""
-                  loading="lazy"
-                  className="h-full w-full object-cover transition duration-700 group-hover:scale-110"
-                />
-              )}
-            </div>
-            <p className="p-4 text-[15px] font-bold tracking-tight">{tr(a.title, locale)}</p>
-          </Link>
-        </Reveal>
-      ))}
-    </Grid>
+    <Carousel
+      label={label}
+      items={photos.map((p) => ({ url: p.url, caption: tr(p.caption, locale), href: `${base}/gallery/${p.albumSlug}` }))}
+      slideClass="basis-full sm:basis-1/2 lg:basis-1/3"
+      aspect="aspect-[4/3]"
+    />
   );
 }
 
 async function MainHome(ctx: Ctx) {
   const { site, locale, dict, base } = ctx;
-  const [news, announcements, events, programs, albums, settings, about] = await Promise.all([
+  const [news, announcements, events, programs, photos, settings, about] = await Promise.all([
     getPosts({ site, kind: 'news', limit: 6 }),
     getPosts({ site, kind: 'announcement', limit: 5 }),
     getEvents(site, 'upcoming', 4),
     getPrograms(),
-    getAlbums(site, 4),
+    getRecentPhotos(site, 18),
     getSettings(site),
     getPage(site, 'about'),
   ]);
@@ -339,12 +327,12 @@ async function MainHome(ctx: Ctx) {
         {/* Yo'nalishlar */}
         {programs.length > 0 && (
           <section>
-            <SectionHeading badge={dict.home.programsBadge} title={dict.home.programsTitle} href={`${base}/admission`} hrefLabel={dict.common.all} />
+            <SectionHeading badge={dict.home.programsBadge} title={dict.home.programsTitle} href={`${base}/programs`} hrefLabel={dict.common.all} />
             <ul className="grid gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-3">
               {programs.map((p, i) => (
                 <Reveal as="li" key={p.id} delay={(i % 3) * 110} anim="up">
                   <Link
-                    href={`${base}/admission`}
+                    href={`${base}/programs/${p.slug}`}
                     className="group relative block h-full overflow-hidden rounded-ios p-6 text-white shadow-ios transition duration-300 hover:-translate-y-1 hover:shadow-ios-lg"
                     style={{ background: 'linear-gradient(145deg,#06335a,#0b5a7c)' }}
                   >
@@ -426,10 +414,10 @@ async function MainHome(ctx: Ctx) {
           </Reveal>
         </div>
 
-        {albums.length > 0 && (
+        {photos.length > 0 && (
           <section>
             <SectionHeading badge={dict.home.gallery} title={dict.home.gallery} href={`${base}/gallery`} hrefLabel={dict.common.all} />
-            <AlbumGrid albums={albums} locale={locale} base={base} />
+            <PhotoCarousel photos={photos} locale={locale} base={base} label={dict.home.gallery} />
           </section>
         )}
 
@@ -464,11 +452,11 @@ async function MainHome(ctx: Ctx) {
 
 async function QualityHome(ctx: Ctx) {
   const { site, locale, dict, base } = ctx;
-  const [posts, staff, events, albums] = await Promise.all([
+  const [posts, staff, events, photos] = await Promise.all([
     getPosts({ site, limit: 6 }),
     getStaff(site),
     getEvents(site, 'upcoming', 4),
-    getAlbums(site, 4),
+    getRecentPhotos(site, 18),
   ]);
 
   return (
@@ -541,10 +529,10 @@ async function QualityHome(ctx: Ctx) {
           </Reveal>
         )}
 
-        {albums.length > 0 && (
+        {photos.length > 0 && (
           <section>
             <SectionHeading badge={dict.home.gallery} title={dict.home.gallery} href={`${base}/gallery`} hrefLabel={dict.common.all} />
-            <AlbumGrid albums={albums} locale={locale} base={base} />
+            <PhotoCarousel photos={photos} locale={locale} base={base} label={dict.home.gallery} />
           </section>
         )}
       </div>

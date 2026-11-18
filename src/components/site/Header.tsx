@@ -57,7 +57,14 @@ export function buildNav(site: Site, locale: Locale, dict: Dict): NavGroup[] {
         { href: `${base}/gallery`, label: dict.nav.gallery, icon: 'image' },
       ],
     },
-    { label: dict.nav.admission, icon: 'graduation', href: `${base}/admission` },
+    {
+      label: dict.nav.admission,
+      icon: 'graduation',
+      children: [
+        { href: `${base}/programs`, label: dict.nav.programs, icon: 'graduation' },
+        { href: `${base}/admission`, label: dict.nav.admission, icon: 'info' },
+      ],
+    },
     media,
     { label: dict.nav.quality, icon: 'shield', href: siteUrl('talimsifati', locale), external: true },
   ];
@@ -108,6 +115,14 @@ export default function Header({ site, locale, dict }: { site: Site; locale: Loc
           <div className="hidden sm:block">
             <LocaleSwitcher locale={locale} />
           </div>
+          <Link
+            href={`${base}/search`}
+            aria-label={dict.search.title}
+            title={dict.search.title}
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25 active:scale-95"
+          >
+            <Icon name="search" className="h-[18px] w-[18px]" />
+          </Link>
           <A11yPanel labels={dict.a11y} />
           <Link href={`${base}/contact`} className="btn hidden !px-5 !py-2.5 sm:inline-flex">
             {dict.home.contactCta}

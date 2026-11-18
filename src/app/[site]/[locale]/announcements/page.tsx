@@ -12,9 +12,9 @@ export default async function AnnouncementsPage({
   searchParams,
 }: {
   params: SiteParams;
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; q?: string }>;
 }) {
   const ctx = await getCtx(params);
-  const { page } = await searchParams;
-  return <PostListPage ctx={ctx} kind="announcement" page={Math.max(1, Number(page) || 1)} />;
+  const { page, q } = await searchParams;
+  return <PostListPage ctx={ctx} kind="announcement" page={Math.max(1, Number(page) || 1)} q={typeof q === 'string' ? q : ''} />;
 }

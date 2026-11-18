@@ -3,9 +3,10 @@ import type { ReactNode } from 'react';
 import Icon, { type IconName } from '@/components/Icon';
 import { tr, type Locale } from '@/lib/i18n/config';
 import type { Dict } from '@/lib/i18n/dictionaries';
-import type { EventRow, Post, Staff } from '@/lib/types';
+import type { EventRow, Post, Program, Staff } from '@/lib/types';
+import { highlightRegex } from '@/lib/search';
 import { homeOf } from '@/lib/site';
-import { formatDate, monthDay } from '@/lib/utils';
+import { formatDate, monthDay, plainText } from '@/lib/utils';
 import CountUp from './CountUp';
 import Reveal from './Reveal';
 
@@ -126,7 +127,8 @@ export function PostCard({ post, locale, dict }: { post: Post; locale: Locale; d
 export function EventItem({ event, locale }: { event: EventRow; locale: Locale }) {
   const { day, month } = monthDay(event.starts_at, locale);
   return (
-    <li className="list-row !items-start">
+    <li>
+      <Link href={`${homeOf(event.site, locale)}/events/${event.slug || event.id}`} className="list-row !items-start">
       <div className="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-accent">
         <span className="text-xl font-bold leading-none">{day}</span>
         <span className="mt-0.5 text-[11px] font-semibold uppercase">{month}</span>
@@ -140,9 +142,10 @@ export function EventItem({ event, locale }: { event: EventRow; locale: Locale }
           </p>
         )}
         {tr(event.description, locale) && (
-          <p className="mt-1 line-clamp-2 text-sm text-muted">{tr(event.description, locale)}</p>
+          <p className="mt-1 line-clamp-2 text-sm text-muted">{plainText(tr(event.description, locale))}</p>
         )}
       </div>
+      </Link>
     </li>
   );
 }
@@ -205,16 +208,24 @@ export function Pagination({
   pageSize,
   basePath,
   dict,
+  query = {},
 }: {
   page: number;
   total: number;
   pageSize: number;
   basePath: string;
   dict: Dict;
+  /** Sahifalashda saqlanadigan qo'shimcha parametrlar (masalan, q) */
+  query?: Record<string, string>;
 }) {
   const pages = Math.max(1, Math.ceil(total / pageSize));
   if (pages <= 1) return null;
-  const link = (p: number) => (p === 1 ? basePath : `${basePath}?page=${p}`);
+  const link = (p: number) => {
+    const sp = new URLSearchParams(query);
+    if (p > 1) sp.set('page', String(p));
+    const qs = sp.toString();
+    return (basePath || '/') + (qs ? `?${qs}` : '');
+  };
   return (
     <nav className="mt-10 flex items-center justify-center gap-3" aria-label="Pagination">
       {page > 1 && (
@@ -265,5 +276,119 @@ export function StatsStrip({ items }: { items: Array<{ value: string; suffix?: s
         </Reveal>
       ))}
     </dl>
+  );
+}
+
+/** Qidiruv formasi (oddiy GET forma, JavaScriptsiz ham ishlaydi) */
+export function SearchForm({
+  action,
+  q = '',
+  dict,
+  autoFocus = false,
+  className = '',
+}: {
+  action: string;
+  q?: string;
+  dict: Dict;
+  autoFocus?: boolean;
+  className?: string;
+}) {
+  return (
+    <form action={action || '/'} method="get" role="search" className={`flex gap-2 ${className}`}>
+      <label className="relative min-w-0 flex-1">
+        <span className="sr-only">{dict.search.title}</span>
+        <Icon name="search" className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted" />
+        <input
+          type="search"
+          name="q"
+          defaultValue={q}
+          autoFocus={autoFocus}
+          maxLength={80}
+          placeholder={dict.search.placeholder}
+          className="w-full rounded-full bg-surface py-3 pl-12 pr-4 text-[16px] shadow-ios outline-none ring-1 ring-[var(--line)] focus:ring-2 focus:ring-[var(--accent)]"
+        />
+      </label>
+      <button type="submit" className="btn !px-6">
+        {dict.search.button}
+      </button>
+    </form>
+  );
+}
+
+/** Topilgan so'zlarni belgilab ko'rsatadi */
+export function Highlight({ text, terms }: { text: string; terms: string[] }) {
+  const re = highlightRegex(terms);
+  if (!re || !text) return <>{text}</>;
+  const parts = text.split(re);
+  return (
+    <>
+      {parts.map((p, i) =>
+        i % 2 === 1 ? (
+          <mark key={i} className="rounded bg-leaf/35 px-0.5 text-inherit">
+            {p}
+          </mark>
+        ) : (
+          <span key={i}>{p}</span>
+        ),
+      )}
+    </>
+  );
+}
+
+/** Yo'nalish kartochkasi (batafsil sahifaga havola) */
+export function ProgramCard({ program: p, locale, dict }: { program: Program; locale: Locale; dict: Dict }) {
+  const href = `${homeOf('main', locale)}/programs/${p.slug}`;
+  return (
+    <article className="card card-hover group relative p-6">
+      <div className="flex items-start gap-4">
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-accent">
+          <Icon name="cross" className="h-6 w-6" strokeWidth={1.8} />
+        </span>
+        <div className="min-w-0">
+          <h3 className="text-lg font-semibold leading-snug tracking-tight">
+            <Link href={href} className="after:absolute after:inset-0 hover:text-accent">
+              {tr(p.name, locale)}
+            </Link>
+          </h3>
+          {tr(p.description, locale) && (
+            <p className="mt-1.5 line-clamp-3 text-[15px] leading-relaxed text-muted">{tr(p.description, locale)}</p>
+          )}
+        </div>
+      </div>
+      <dl className="mt-5 flex flex-wrap gap-2 text-sm">
+        {tr(p.duration, locale) && (
+          <div className="chip" title={dict.admission.duration}>
+            <Icon name="clock" className="h-3.5 w-3.5" />
+            <dt className="sr-only">{dict.admission.duration}</dt>
+            <dd>{tr(p.duration, locale)}</dd>
+          </div>
+        )}
+        {tr(p.study_form, locale) && (
+          <div className="chip" title={dict.admission.form}>
+            <Icon name="book" className="h-3.5 w-3.5" />
+            <dt className="sr-only">{dict.admission.form}</dt>
+            <dd>{tr(p.study_form, locale)}</dd>
+          </div>
+        )}
+        {tr(p.language, locale) && (
+          <div className="chip" title={dict.admission.language}>
+            <Icon name="globe" className="h-3.5 w-3.5" />
+            <dt className="sr-only">{dict.admission.language}</dt>
+            <dd>{tr(p.language, locale)}</dd>
+          </div>
+        )}
+        {p.quota != null && (
+          <div className="chip" title={dict.admission.quota}>
+            <Icon name="users" className="h-3.5 w-3.5" />
+            <dt className="sr-only">{dict.admission.quota}</dt>
+            <dd>{p.quota}</dd>
+          </div>
+        )}
+      </dl>
+      <span className="mt-5 inline-flex items-center gap-1 text-[15px] font-medium text-accent">
+        {dict.programs.details}
+        <Icon name="chevron-right" className="h-4 w-4" strokeWidth={2.2} />
+      </span>
+    </article>
   );
 }

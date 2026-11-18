@@ -3,11 +3,21 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Icon from '@/components/Icon';
+import Carousel from './Carousel';
 
 export type GalleryImage = { url: string; caption?: string | null };
 
 /** Rasmlar to'plami + to'liq ekran ko'rish (lightbox). Lightbox document.body ga chiqariladi. */
-export default function MediaGallery({ images }: { images: GalleryImage[] }) {
+export default function MediaGallery({
+  images,
+  carousel = false,
+  label = 'Photos',
+}: {
+  images: GalleryImage[];
+  /** true bo'lsa tepada katta karusel, pastda barcha rasmlar to'ri ko'rsatiladi */
+  carousel?: boolean;
+  label?: string;
+}) {
   const [index, setIndex] = useState<number | null>(null);
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -35,6 +45,18 @@ export default function MediaGallery({ images }: { images: GalleryImage[] }) {
 
   return (
     <>
+      {carousel && images.length > 0 && (
+        <div className="mb-6">
+          <Carousel
+            items={images.map((i) => ({ url: i.url, caption: i.caption }))}
+            onOpen={setIndex}
+            label={label}
+            aspect="aspect-[4/3] sm:aspect-[16/9]"
+            autoplayMs={6000}
+            priorityFirst
+          />
+        </div>
+      )}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         {images.map((img, i) => (
           <button

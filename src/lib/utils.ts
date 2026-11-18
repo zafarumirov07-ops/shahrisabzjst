@@ -89,3 +89,13 @@ export function fileSizeLabel(bytes: number | null | undefined): string {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
+
+/** Markdown belgilarini olib tashlab, qisqa ko'rinish uchun oddiy matn qaytaradi */
+export function plainText(md: string): string {
+  return md
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/[#>*_`~-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}

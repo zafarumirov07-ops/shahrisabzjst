@@ -40,7 +40,7 @@ export default async function AlbumPage({ params }: { params: Params }) {
           {dict.nav.gallery}
         </Link>
 
-        <MediaGallery images={images} />
+        <MediaGallery images={images} carousel label={tr(album.title, locale)} />
 
         {(videos.length > 0 || embeds.length > 0) && (
           <section>

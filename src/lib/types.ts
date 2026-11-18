@@ -68,10 +68,13 @@ export type Program = {
   language: I18n;
   quota: number | null;
   sort_order: number;
+  body?: I18n;
+  cover_url?: string | null;
 };
 
 export type EventRow = {
   id: string;
+  slug?: string | null;
   site: Site;
   title: I18n;
   description: I18n;
@@ -127,3 +130,17 @@ export type SiteSettings = {
     image_url?: string;
   };
 };
+
+export type SearchType = 'news' | 'announcement' | 'event' | 'album' | 'program' | 'page';
+
+export type SearchHit = {
+  type: SearchType;
+  id: string;
+  slug: string;
+  title: I18n;
+  snippet: I18n;
+  cover_url: string | null;
+  at: string | null;
+};
+
+export type RecentPhoto = { url: string; caption: I18n; albumSlug: string };
