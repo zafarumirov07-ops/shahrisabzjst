@@ -65,7 +65,7 @@ function Section({ site, section, lang }: { site: string; section: SettingsSecti
 
 export default function SettingsForm({ site, sections }: { site: string; sections: SettingsSection[] }) {
   const [lang, setLang] = useState<Locale>(DEFAULT_LOCALE);
-  const filled = { uz: true, ru: false, en: false } as Record<Locale, boolean>;
+  const filled = Object.fromEntries(LOCALES.map((l) => [l, l === DEFAULT_LOCALE])) as Record<Locale, boolean>;
   for (const l of LOCALES) {
     for (const s of sections)
       for (const f of s.fields) {

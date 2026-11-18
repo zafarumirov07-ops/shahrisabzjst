@@ -1,6 +1,6 @@
 import type { Locale } from '@/lib/i18n/config';
 
-const INTL_LOCALE: Record<Locale, string> = { uz: 'uz-UZ', ru: 'ru-RU', en: 'en-GB' };
+const INTL_LOCALE: Record<Locale, string> = { uz: 'uz-UZ', oz: 'uz-Cyrl-UZ', ru: 'ru-RU', en: 'en-GB' };
 
 export function formatDate(value: string | Date | null | undefined, locale: Locale): string {
   if (!value) return '';

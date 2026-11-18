@@ -13,13 +13,14 @@ export default function NotFound() {
   const maybeLocale = prefix ? parts[1] : parts[0];
   const locale = isLocale(maybeLocale) ? maybeLocale : DEFAULT_LOCALE;
   const dict = getDict(locale);
+  const home = `${prefix}${locale === DEFAULT_LOCALE ? '' : `/${locale}`}` || '/';
 
   return (
     <div className="container-page flex min-h-[50vh] flex-col items-center justify-center py-20 text-center">
       <p className="text-6xl font-extrabold text-accent">404</p>
       <h1 className="mt-4 text-2xl font-bold">{dict.common.notFoundTitle}</h1>
       <p className="mt-2 max-w-md text-muted">{dict.common.notFoundText}</p>
-      <Link href={`${prefix}/${locale}`} className="btn mt-6">
+      <Link href={home} className="btn mt-6">
         {dict.common.goHome}
       </Link>
     </div>

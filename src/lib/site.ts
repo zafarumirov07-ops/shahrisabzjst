@@ -1,4 +1,4 @@
-import type { Locale } from '@/lib/i18n/config';
+import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n/config';
 
 export const SITES = ['main', 'talimsifati'] as const;
 export type Site = (typeof SITES)[number];
@@ -37,14 +37,23 @@ function protocolFor(domain: string): string {
  *   talimsifati  -> /talimsifati/uz   (path rejimida)  yoki  /uz  (subdomen rejimida)
  */
 export function homeOf(site: Site, locale: Locale): string {
-  if (site === 'talimsifati' && QUALITY_MODE === 'path') return `/${QUALITY_SLUG}/${locale}`;
-  return `/${locale}`;
+  const isDefault = locale === DEFAULT_LOCALE;
+  if (site === 'talimsifati' && QUALITY_MODE === 'path') {
+    return isDefault ? `/${QUALITY_SLUG}` : `/${QUALITY_SLUG}/${locale}`;
+  }
+  return isDefault ? '' : `/${locale}`;
+}
+
+/** Bosh sahifa havolasi uchun: bo'sh qator o'rniga "/" */
+export function homeHref(site: Site, locale: Locale): string {
+  return homeOf(site, locale) || '/';
 }
 
 /** Boshqa saytga havola. Path rejimida bir xil domen ichidagi yo'l, subdomen rejimida to'liq manzil. */
 export function siteUrl(site: Site, locale: Locale, path = ''): string {
-  if (QUALITY_MODE === 'path') return `${homeOf(site, locale)}${path}`;
+  if (QUALITY_MODE === 'path') return `${homeOf(site, locale)}${path}` || '/';
   const domain = ROOT_DOMAIN.replace(/^www\./, '');
   const host = site === 'main' ? domain : `${QUALITY_SLUG}.${domain}`;
-  return `${protocolFor(domain)}://${host}/${locale}${path}`;
+  const prefix = locale === DEFAULT_LOCALE ? '' : `/${locale}`;
+  return `${protocolFor(domain)}://${host}${prefix}${path}` + (prefix || path ? '' : '/');
 }

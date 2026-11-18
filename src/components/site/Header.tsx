@@ -39,7 +39,7 @@ export function buildNav(site: Site, locale: Locale, dict: Dict): NavGroup[] {
 
   if (site === 'talimsifati') {
     return [
-      { label: dict.nav.home, icon: 'home', href: base },
+      { label: dict.nav.home, icon: 'home', href: base || '/' },
       media,
       { label: dict.nav.teamQuality, icon: 'users', href: `${base}/team` },
       { label: dict.nav.gallery, icon: 'image', href: `${base}/gallery` },
@@ -47,7 +47,7 @@ export function buildNav(site: Site, locale: Locale, dict: Dict): NavGroup[] {
     ];
   }
   return [
-    { label: dict.nav.home, icon: 'home', href: base },
+    { label: dict.nav.home, icon: 'home', href: base || '/' },
     {
       label: dict.nav.school,
       icon: 'building',
@@ -80,7 +80,7 @@ export default function Header({ site, locale, dict }: { site: Site; locale: Loc
       {/* Texnikum nomi doim to'liq ko'rinadi: kerak bo'lsa ikki qatorga o'raladi.
           lg..2xl oralig'ida menyu ikkinchi qatorga tushadi, 2xl dan boshlab hammasi bir qatorda. */}
       <div className="glass mx-auto flex max-w-[1920px] flex-wrap items-center justify-between gap-x-3 gap-y-1.5 rounded-[1.75rem] py-2 pl-2 pr-2 text-white shadow-ios-lg ring-1 ring-white/10 sm:pl-3 2xl:flex-nowrap 2xl:rounded-full 2xl:py-1.5">
-        <Link href={base} className="flex min-w-0 flex-1 items-center gap-2.5 2xl:flex-none" aria-label={dict.siteName}>
+        <Link href={base || '/'} className="flex min-w-0 flex-1 items-center gap-2.5 2xl:flex-none" aria-label={dict.siteName}>
           <LogoMark className="h-10 w-10 sm:h-12 sm:w-12" />
           <span className="min-w-0">
             {isQuality && (

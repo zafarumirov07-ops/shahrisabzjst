@@ -4,14 +4,18 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import Icon from '@/components/Icon';
+import { isLocale } from '@/lib/i18n/config';
 import { QUALITY_SLUG } from '@/lib/site';
 import type { NavGroup } from './Header';
 
 export function isActive(pathname: string, href: string): boolean {
   if (href.startsWith('http')) return false;
   const parts = href.split('/').filter(Boolean);
-  // Bosh sahifa: "/uz" yoki "/talimsifati/uz"
-  const isHome = parts.length <= 1 || (parts[0] === QUALITY_SLUG && parts.length === 2);
+  // Bosh sahifa: "/", "/oz", "/talimsifati", "/talimsifati/oz"
+  const isHome =
+    parts.length === 0 ||
+    (parts.length === 1 && (parts[0] === QUALITY_SLUG || isLocale(parts[0]))) ||
+    (parts[0] === QUALITY_SLUG && parts.length === 2 && isLocale(parts[1]));
   if (isHome) return pathname === href || pathname === `${href}/`;
   return pathname === href || pathname.startsWith(`${href}/`);
 }

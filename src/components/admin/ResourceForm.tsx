@@ -47,7 +47,7 @@ export default function ResourceForm({
 
   // Qaysi tillarda matn to'ldirilgani (tab yonidagi nuqta uchun)
   const filled = useMemo(() => {
-    const out = { uz: false, ru: false, en: false } as Record<Locale, boolean>;
+    const out = Object.fromEntries(LOCALES.map((l) => [l, false])) as Record<Locale, boolean>;
     for (const f of resource.fields) {
       if (!f.type.startsWith('i18n')) continue;
       const v = values[f.name] as Partial<Record<Locale, string>> | undefined;
@@ -63,7 +63,8 @@ export default function ResourceForm({
       // Slug sarlavhadan avtomatik hosil bo'ladi (qo'lda tahrirlanmaguncha)
       const slugField = resource.fields.find((f) => f.type === 'slug');
       if (slugField && field.name === slugField.from && !slugTouched) {
-        const src = (value as Partial<Record<Locale, string>> | undefined)?.uz ?? '';
+        const v = value as Partial<Record<Locale, string>> | undefined;
+        const src = v?.uz || v?.oz || v?.ru || v?.en || '';
         next[slugField.name] = slugify(src);
       }
       if (field.type === 'slug') setSlugTouched(true);

@@ -1,4 +1,5 @@
 import type { Locale } from './config';
+import { latToCyr, mapDeep } from './translit';
 
 const uz = {
   siteName: "Shahrisabz Abu Ali ibn Sino nomidagi jamoat salomatligi texnikumi",
@@ -440,7 +441,10 @@ const en: Dict = {
   },
 };
 
-const dictionaries: Record<Locale, Dict> = { uz, ru, en };
+// O'zbekcha kirill lug'ati lotin matndan qoida bo'yicha o'giriladi (qo'lda tuzatish kerak bo'lsa shu yerga qo'shiladi)
+const oz: Dict = mapDeep(uz, latToCyr);
+
+const dictionaries: Record<Locale, Dict> = { uz, oz, ru, en };
 
 export function getDict(locale: Locale): Dict {
   return dictionaries[locale];
