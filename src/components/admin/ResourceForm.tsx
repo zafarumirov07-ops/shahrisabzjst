@@ -41,6 +41,8 @@ export default function ResourceForm({
   const [slugTouched, setSlugTouched] = useState(Boolean(id));
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [autoTranslate, setAutoTranslate] = useState(true);
+  const autoLangs = Array.isArray(initial.auto_langs) ? (initial.auto_langs as string[]) : [];
   const [pending, startTransition] = useTransition();
 
   const hasI18n = resource.fields.some((f) => f.type.startsWith('i18n'));
@@ -83,6 +85,7 @@ export default function ResourceForm({
         id,
         values,
         attachments.map((a) => ({ id: a.id, kind: a.kind, url: a.url, text: a.text })),
+        { autoTranslate },
       );
       if (result.error) {
         setError(result.error);
@@ -90,7 +93,7 @@ export default function ResourceForm({
         return;
       }
       setSaved(true);
-      router.push(`${listHref}?saved=1`);
+      router.push(`${listHref}?saved=${result.warning ?? 1}`);
       router.refresh();
     });
   }
@@ -107,7 +110,14 @@ export default function ResourceForm({
         <div className="sticky top-0 z-20 -mx-1 flex flex-wrap items-center gap-3 rounded-xl bg-page/90 px-1 py-2 backdrop-blur">
           <span className="text-sm font-medium text-muted">Matn tili:</span>
           <LangTabs lang={lang} onChange={setLang} filled={filled} />
-          <span className="text-xs text-muted">O‘zbekcha majburiy, qolgan tillar ixtiyoriy (bo‘sh bo‘lsa o‘zbekcha ko‘rsatiladi)</span>
+          <label className="inline-flex cursor-pointer items-center gap-2 text-sm">
+            <input type="checkbox" checked={autoTranslate} onChange={(e) => setAutoTranslate(e.target.checked)} className="h-4 w-4 accent-[var(--accent)]" />
+            Bo‘sh tillarga avto tarjima
+          </label>
+          <span className="basis-full text-xs text-muted">
+            Bitta tilda yozing, qolganlari avtomatik to‘ldiriladi (kirill — avtomatik o‘giriladi, ru/en — tarjima). Qo‘lda yozganingiz hech qachon o‘zgarmaydi.
+            {autoLangs.length > 0 && <> Avto tarjima qilingan: {[...new Set(autoLangs.map((k) => k.split('.')[1]))].join(', ')}.</>}
+          </span>
         </div>
       )}
 
@@ -135,7 +145,7 @@ export default function ResourceForm({
       <div className="flex items-center gap-3">
         <button type="submit" className="btn" disabled={pending}>
           {pending && <Spinner className="h-4 w-4" />}
-          {pending ? 'Saqlanmoqda…' : 'Saqlash'}
+          {pending ? (autoTranslate && hasI18n ? 'Saqlanmoqda va tarjima qilinmoqda…' : 'Saqlanmoqda…') : 'Saqlash'}
         </button>
         <Link href={listHref} className="btn-outline">
           Bekor qilish

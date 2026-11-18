@@ -10,6 +10,8 @@ export const metadata: Metadata = {
 
 // Admin panel doim sessiyaga bog'liq, shuning uchun keshlanmaydi
 export const dynamic = 'force-dynamic';
+// Saqlash paytida avto tarjima biroz vaqt olishi mumkin
+export const maxDuration = 60;
 
 export default function AdminRootLayout({ children }: { children: ReactNode }) {
   return (

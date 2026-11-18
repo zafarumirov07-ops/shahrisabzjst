@@ -4,13 +4,14 @@ import { revalidatePath } from 'next/cache';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { allowedSites, requireStaff } from '@/lib/admin/auth';
+import { applyAutoTranslate } from '@/lib/admin/auto-translate';
 import { createSession, destroySession, verifyCredentials } from '@/lib/admin/session';
 import { RESOURCES, SOCIAL_KEYS, type Field } from '@/lib/admin/resources';
 import type { MediaRow } from '@/lib/admin/upload';
 import { LOCALES } from '@/lib/i18n/config';
 import { slugify } from '@/lib/utils';
 
-export type ActionResult = { ok?: boolean; error?: string; id?: string };
+export type ActionResult = { ok?: boolean; error?: string; id?: string; warning?: 'quota' | 'error' };
 
 export type AttachmentInput = {
   id?: string;
@@ -75,8 +76,8 @@ function normalizeValue(value: unknown, field: Field): unknown {
 
 function isMissing(value: unknown, field: Field): boolean {
   if (field.type.startsWith('i18n')) {
-    // o'zbekcha (asosiy til) majburiy
-    return !(value as Record<string, string>)?.uz;
+    // kamida bitta tilda matn bo'lishi shart (qolganlari avtomatik to'ldiriladi)
+    return !Object.values((value as Record<string, string>) ?? {}).some(Boolean);
   }
   return value === null || value === undefined || value === '';
 }
@@ -90,6 +91,7 @@ export async function saveRecord(
   id: string | null,
   values: Values,
   attachments: AttachmentInput[] = [],
+  options: { autoTranslate?: boolean } = {},
 ): Promise<ActionResult> {
   const { supabase, profile } = await requireStaff();
   const res = RESOURCES[resourceKey];
@@ -105,7 +107,7 @@ export async function saveRecord(
 
   for (const f of res.fields) {
     if (f.required && isMissing(payload[f.name], f)) {
-      const suffix = f.type.startsWith('i18n') ? " (o'zbekcha)" : '';
+      const suffix = f.type.startsWith('i18n') ? " (kamida bitta tilda)" : '';
       return { error: `"${f.label}"${suffix} to'ldirilishi shart` };
     }
   }
@@ -113,6 +115,21 @@ export async function saveRecord(
   if (res.hasSite && !sites.includes(String(payload.site) as 'main' | 'talimsifati')) {
     return { error: "Tanlangan saytga yozish huquqingiz yo'q" };
   }
+
+  // Bo'sh tillarni avtomatik to'ldirish (mavjud yozuv bilan solishtiriladi)
+  const i18nNames = res.fields.filter((f) => f.type.startsWith('i18n')).map((f) => f.name);
+  let existing: Record<string, unknown> | null = null;
+  let autoSupported = true;
+  if (id && i18nNames.length) {
+    let r = await supabase.from(res.table).select([...i18nNames, 'auto_langs'].join(',')).eq('id', id).maybeSingle();
+    if (r.error) {
+      autoSupported = false; // auto_langs ustuni hali yo'q (migratsiya ishga tushirilmagan)
+      r = await supabase.from(res.table).select(i18nNames.join(',')).eq('id', id).maybeSingle();
+    }
+    existing = (r.data as unknown as Record<string, unknown>) ?? null;
+  }
+  const auto = await applyAutoTranslate(res, payload, existing, options.autoTranslate !== false);
+  if (i18nNames.length && autoSupported) payload.auto_langs = auto.autoLangs;
 
   // Slug: bo'sh bo'lsa sarlavhadan hosil qilinadi
   const slugField = res.fields.find((f) => f.type === 'slug');
@@ -123,7 +140,7 @@ export async function saveRecord(
       payload[slugField.name] = given;
     } else {
       const source = slugField.from ? (payload[slugField.from] as Record<string, string> | undefined) : undefined;
-      payload[slugField.name] = slugify(source?.uz ?? '') || `item-${randomSuffix()}`;
+      payload[slugField.name] = slugify(source?.uz || source?.ru || source?.en || '') || `item-${randomSuffix()}`;
       slugAuto = !id;
     }
   }
@@ -139,7 +156,7 @@ export async function saveRecord(
   let recordId = id;
   let lastError: { code?: string; message: string } | null = null;
 
-  for (let attempt = 0; attempt < 2; attempt++) {
+  for (let attempt = 0; attempt < 3; attempt++) {
     if (id) {
       const { data, error } = await supabase.from(res.table).update(payload).eq('id', id).select('id');
       if (error) lastError = error;
@@ -155,7 +172,11 @@ export async function saveRecord(
       }
     }
 
-    if (lastError?.code === '23505' && slugField && slugAuto && attempt === 0) {
+    if (lastError && 'auto_langs' in payload && /auto_langs/.test(lastError.message)) {
+      delete payload.auto_langs; // migratsiya hali ishga tushirilmagan: belgisiz saqlaymiz
+      continue;
+    }
+    if (lastError?.code === '23505' && slugField && slugAuto && attempt < 2) {
       // Avtomatik yaratilgan slug band bo'lsa, suffiks qo'shib qayta urinamiz
       payload[slugField.name] = `${String(payload[slugField.name])}-${randomSuffix()}`;
       continue;
@@ -205,7 +226,7 @@ export async function saveRecord(
   }
 
   refreshPublic();
-  return { ok: true, id: recordId };
+  return { ok: true, id: recordId, warning: auto.warning };
 }
 
 export async function deleteRecord(resourceKey: string, id: string): Promise<ActionResult> {
