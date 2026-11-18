@@ -104,6 +104,8 @@ const uz = {
     call: 'Qo‘ng‘iroq qilish',
     write: 'Xat yozish',
     map: 'Xaritada ochish',
+    route: 'Marshrut qurish',
+    ourLocation: 'Bizning manzil',
   },
   quality: {
     heroTitle: "Ta'lim sifati — bizning ustuvor vazifamiz",
@@ -252,6 +254,8 @@ const ru: Dict = {
     call: 'Позвонить',
     write: 'Написать',
     map: 'Открыть на карте',
+    route: 'Построить маршрут',
+    ourLocation: 'Наше местоположение',
   },
   quality: {
     heroTitle: 'Качество образования — наша приоритетная задача',
@@ -398,6 +402,8 @@ const en: Dict = {
     call: 'Call',
     write: 'Write',
     map: 'Open in maps',
+    route: 'Get directions',
+    ourLocation: 'Our location',
   },
   quality: {
     heroTitle: 'Education quality is our top priority',

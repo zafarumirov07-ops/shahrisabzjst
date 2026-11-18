@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
 import Icon, { type IconName } from '@/components/Icon';
-import { PageHeader, SOCIAL_ICON } from '@/components/site/ui';
+import { SocialBadge, knownSocials, socialLabel } from '@/components/site/Social';
+import { PageHeader } from '@/components/site/ui';
 import { getCtx, type SiteParams } from '@/lib/ctx';
 import { getSettings } from '@/lib/data';
 import { tr } from '@/lib/i18n/config';
+import { mapEmbed, mapLink, routeLink } from '@/lib/map';
 
 export const revalidate = 60;
 
@@ -18,7 +20,9 @@ export default async function ContactPage({ params }: { params: SiteParams }) {
   const c = settings.contact ?? {};
   const address = tr(c.address, locale);
   const hours = tr(c.working_hours, locale);
-  const socials = Object.entries(settings.socials ?? {}).filter(([, v]) => !!v);
+  const socials = knownSocials(settings.socials);
+  const embed = mapEmbed(c, address);
+  const route = routeLink(c, address);
 
   const rows: Array<{ icon: IconName; label: string; value: string; href?: string; action?: string }> = [];
   if (address)
@@ -26,7 +30,7 @@ export default async function ContactPage({ params }: { params: SiteParams }) {
       icon: 'pin',
       label: dict.contact.address,
       value: address,
-      href: c.map_url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`,
+      href: mapLink(c, address),
       action: dict.contact.map,
     });
   if (c.phone)
@@ -76,12 +80,34 @@ export default async function ContactPage({ params }: { params: SiteParams }) {
           </ul>
         )}
 
+        {embed && (
+          <section aria-label={dict.contact.ourLocation} className="card overflow-hidden">
+            <iframe
+              src={embed}
+              title={dict.contact.ourLocation}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              allowFullScreen
+              className="block h-[320px] w-full border-0 sm:h-[420px]"
+            />
+            {route && (
+              <div className="flex flex-wrap items-center justify-between gap-3 p-4">
+                <p className="text-[15px] font-medium">{address}</p>
+                <a href={route} target="_blank" rel="noopener noreferrer" className="btn !px-5 !py-2.5">
+                  <Icon name="pin" className="h-[18px] w-[18px]" />
+                  {dict.contact.route}
+                </a>
+              </div>
+            )}
+          </section>
+        )}
+
         {socials.length > 0 && (
           <div className="flex flex-wrap gap-3">
             {socials.map(([k, url]) => (
-              <a key={k} href={url} target="_blank" rel="noopener noreferrer" className="btn-outline capitalize">
-                <Icon name={SOCIAL_ICON[k] ?? 'link'} className="h-[18px] w-[18px]" />
-                {k}
+              <a key={k} href={url} target="_blank" rel="noopener noreferrer" className="btn-outline !gap-2.5 !pl-2">
+                <SocialBadge name={k} className="h-7 w-7" glyphClass="h-4 w-4" />
+                {socialLabel(k)}
               </a>
             ))}
           </div>

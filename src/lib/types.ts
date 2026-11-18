@@ -107,6 +107,8 @@ export type SiteSettings = {
     address?: I18n;
     working_hours?: I18n;
     map_url?: string;
+    lat?: string;
+    lng?: string;
   };
   socials?: {
     telegram?: string;

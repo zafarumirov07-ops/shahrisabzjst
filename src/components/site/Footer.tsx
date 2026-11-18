@@ -6,7 +6,8 @@ import type { Dict } from '@/lib/i18n/dictionaries';
 import { homeOf, type Site } from '@/lib/site';
 import type { SiteSettings } from '@/lib/types';
 import { buildNav, flatNav, LogoMark } from './Header';
-import { SOCIAL_ICON } from './ui';
+import { SocialBadge, knownSocials, socialLabel } from './Social';
+import { mapLink } from '@/lib/map';
 
 export default function Footer({
   site,
@@ -21,8 +22,9 @@ export default function Footer({
 }) {
   const nav = flatNav(buildNav(site, locale, dict));
   const contact = settings.contact ?? {};
-  const socials = Object.entries(settings.socials ?? {}).filter(([, v]) => !!v);
+  const socials = knownSocials(settings.socials);
   const address = tr(contact.address, locale);
+  const mapHref = mapLink(contact, address);
 
   return (
     <footer className="mt-20 px-3 pb-4 sm:px-5 lg:px-8 2xl:px-12">
@@ -41,17 +43,18 @@ export default function Footer({
             </div>
             <p className="mt-4 max-w-sm text-sm text-white/70">{dict.tagline}</p>
             {socials.length > 0 && (
-              <div className="mt-5 flex flex-wrap gap-2">
+              <div className="mt-5 flex flex-wrap gap-2.5">
                 {socials.map(([key, url]) => (
                   <a
                     key={key}
                     href={url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    aria-label={key}
-                    className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-leaf hover:text-[#04223d]"
+                    aria-label={socialLabel(key)}
+                    title={socialLabel(key)}
+                    className="rounded-full ring-2 ring-white/20 transition hover:-translate-y-0.5 hover:ring-white/60"
                   >
-                    <Icon name={SOCIAL_ICON[key] ?? 'link'} className="h-5 w-5" />
+                    <SocialBadge name={key} />
                   </a>
                 ))}
               </div>
@@ -89,7 +92,9 @@ export default function Footer({
               {address && (
                 <li className="flex gap-3">
                   <Icon name="pin" className="mt-0.5 h-5 w-5 shrink-0 text-sky" />
-                  <span>{address}</span>
+                  <a href={mapHref} target="_blank" rel="noopener noreferrer" className="hover:text-white" title={dict.contact.map}>
+                    {address}
+                  </a>
                 </li>
               )}
               {contact.phone && (

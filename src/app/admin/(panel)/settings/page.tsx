@@ -56,6 +56,8 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
         { name: 'email', label: 'Elektron pochta', type: 'text' },
         { name: 'working_hours', label: 'Ish vaqti', type: 'i18n' },
         { name: 'map_url', label: 'Xarita havolasi (ixtiyoriy)', type: 'url' },
+        { name: 'lat', label: 'Kenglik (lat), masalan 39.0346156', type: 'text' },
+        { name: 'lng', label: 'Uzunlik (lng), masalan 66.8077641', type: 'text' },
       ],
     },
     {
