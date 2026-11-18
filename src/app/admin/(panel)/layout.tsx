@@ -1,13 +1,11 @@
-import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { signOut } from '@/app/admin/actions';
-import Icon, { type IconName } from '@/components/Icon';
+import AdminNav, { type AdminNavLink } from '@/components/admin/AdminNav';
+import Icon from '@/components/Icon';
 import { LogoMark } from '@/components/site/Header';
 import { allowedSites, getSessionProfile, isStaffRole } from '@/lib/admin/auth';
 import { ROLE_LABELS } from '@/lib/admin/roles';
 import { siteUrl } from '@/lib/site';
-
-type NavLink = { href: string; label: string; icon: IconName };
 
 export default async function PanelLayout({ children }: { children: ReactNode }) {
   const { profile } = await getSessionProfile();
@@ -15,7 +13,7 @@ export default async function PanelLayout({ children }: { children: ReactNode })
   const sites = allowedSites(profile.role);
   const hasMain = sites.includes('main');
 
-  const nav: NavLink[] = [{ href: '/admin', label: 'Bosh sahifa', icon: 'grid' }];
+  const nav: AdminNavLink[] = [{ href: '/admin', label: 'Bosh sahifa', icon: 'grid' }];
   if (staff) {
     nav.push(
       { href: '/admin/r/posts', label: 'Postlar', icon: 'newspaper' },
@@ -25,7 +23,7 @@ export default async function PanelLayout({ children }: { children: ReactNode })
     );
     if (hasMain) {
       nav.push(
-        { href: '/admin/r/programs', label: "Qabul yo'nalishlari", icon: 'graduation' },
+        { href: '/admin/r/programs', label: "Yo'nalishlar", icon: 'graduation' },
         { href: '/admin/r/departments', label: "Bo'limlar", icon: 'building' },
       );
     }
@@ -49,18 +47,7 @@ export default async function PanelLayout({ children }: { children: ReactNode })
             <p className="text-xs text-muted">{ROLE_LABELS[profile.role]}</p>
           </div>
         </div>
-        <nav className="flex gap-1 overflow-x-auto px-3 pb-3 lg:flex-col lg:overflow-visible lg:pb-4" aria-label="Admin">
-          {nav.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              className="flex shrink-0 items-center gap-2.5 whitespace-nowrap rounded-xl px-3 py-2 text-[14.5px] font-medium text-fg transition hover:bg-[var(--accent-soft)] hover:text-accent"
-            >
-              <Icon name={l.icon} className="h-5 w-5 text-accent" />
-              {l.label}
-            </Link>
-          ))}
-        </nav>
+        <AdminNav links={nav} />
         <div className="hidden p-4 text-sm lg:block" style={{ borderTop: '0.5px solid var(--line)' }}>
           {sites.map((s) => (
             <a key={s} href={siteUrl(s, 'uz')} target="_blank" rel="noreferrer" className="link flex items-center gap-1 py-1">

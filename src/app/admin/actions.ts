@@ -190,17 +190,18 @@ export async function saveRecord(
 
     const keepIds = new Set(clean.map((c) => c.id).filter(Boolean) as string[]);
     const removeIds = (existing ?? []).map((r) => r.id as string).filter((x) => !keepIds.has(x));
-    if (removeIds.length) {
-      const { error } = await supabase.from(cfg.table).delete().in('id', removeIds);
-      if (error) return { error: `Biriktirmani o'chirishda xatolik: ${error.message}` };
-    }
+    const known = new Set((existing ?? []).map((r) => r.id as string));
+    // id si bor va bazada mavjud qatorlar bitta upsert bilan, yangilari bitta insert bilan, o'chirish ham shu vaqtda
+    const toUpdate = clean.filter((c) => c.id && known.has(c.id)).map((c) => ({ id: c.id, ...c.row }));
+    const toInsert = clean.filter((c) => !c.id || !known.has(c.id)).map((c) => c.row);
 
-    for (const item of clean) {
-      const { error } = item.id
-        ? await supabase.from(cfg.table).update(item.row).eq('id', item.id)
-        : await supabase.from(cfg.table).insert(item.row);
-      if (error) return { error: `Biriktirmani saqlashda xatolik: ${error.message}` };
-    }
+    const results = await Promise.all([
+      removeIds.length ? supabase.from(cfg.table).delete().in('id', removeIds) : null,
+      toUpdate.length ? supabase.from(cfg.table).upsert(toUpdate, { onConflict: 'id' }) : null,
+      toInsert.length ? supabase.from(cfg.table).insert(toInsert) : null,
+    ]);
+    const failed = results.find((r) => r?.error);
+    if (failed?.error) return { error: `Biriktirmani saqlashda xatolik: ${failed.error.message}` };
   }
 
   refreshPublic();

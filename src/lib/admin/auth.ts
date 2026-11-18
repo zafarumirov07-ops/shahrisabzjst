@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { cache } from 'react';
 import { adminLoginConfigured, readSession } from '@/lib/admin/session';
 import type { AppRole } from '@/lib/admin/roles';
 import { adminDbConfigured, createAdminClient } from '@/lib/supabase/admin';
@@ -25,7 +26,7 @@ export function isStaffRole(role: AppRole): boolean {
 }
 
 /** Kirmagan foydalanuvchi /admin/login ga yo'naltiriladi. */
-export async function getSessionProfile() {
+export const getSessionProfile = cache(async function getSessionProfile() {
   if (!adminLoginConfigured() || !adminDbConfigured()) redirect('/admin/login');
   const session = await readSession();
   if (!session) redirect('/admin/login');
@@ -35,7 +36,7 @@ export async function getSessionProfile() {
     user: { id: session.login },
     profile: { id: session.login, email: session.login, full_name: session.login, role: session.role } as Profile,
   };
-}
+});
 
 export async function requireStaff() {
   const ctx = await getSessionProfile();

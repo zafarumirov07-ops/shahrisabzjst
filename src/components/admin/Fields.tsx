@@ -1,13 +1,18 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import dynamic from 'next/dynamic';
 import Icon, { type IconName } from '@/components/Icon';
 import { LOCALES, LOCALE_LABELS, type Locale } from '@/lib/i18n/config';
 import { SOCIAL_KEYS, type Field, type Option } from '@/lib/admin/resources';
 import { toLocalInput } from '@/lib/admin/upload';
 import MediaPicker from './MediaPicker';
+
+// Ko'rish rejimi faqat kerak bo'lganda yuklanadi (forma tezroq ochiladi)
+const MarkdownPreview = dynamic(() => import('./MarkdownPreview'), {
+  ssr: false,
+  loading: () => <p className="text-muted">Yuklanmoqda…</p>,
+});
 
 export type I18nValue = Partial<Record<Locale, string>>;
 
@@ -109,7 +114,7 @@ function MarkdownEditor({
       {preview ? (
         <div className="prose min-h-[10rem] max-w-none p-4">
           {value.trim() ? (
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{value}</ReactMarkdown>
+            <MarkdownPreview value={value} />
           ) : (
             <p className="text-muted">Matn bo‘sh</p>
           )}

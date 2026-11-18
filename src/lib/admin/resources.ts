@@ -48,6 +48,8 @@ export type AttachmentsConfig = {
   label: string;
 };
 
+export type ListFilter = { field: string; label: string; options: Option[] };
+
 export type Resource = {
   key: string;
   table: string;
@@ -62,6 +64,8 @@ export type Resource = {
   columns: Column[];
   orderBy: { column: string; ascending: boolean };
   attachments?: AttachmentsConfig;
+  /** Ro'yxat ustidagi filtrlar (qiymat bo'yicha aniq moslik) */
+  filters?: ListFilter[];
 };
 
 const SITE_FIELD: Field = { name: 'site', label: 'Qaysi saytda', type: 'site', required: true };
@@ -119,6 +123,10 @@ export const RESOURCES: Record<string, Resource> = {
       { label: "Ko'rilgan", field: 'view_count', kind: 'number' },
     ],
     orderBy: { column: 'created_at', ascending: false },
+    filters: [
+      { field: 'kind', label: 'Turi', options: [{ value: 'news', label: 'Yangilik' }, { value: 'announcement', label: "E'lon" }] },
+      { field: 'status', label: 'Holati', options: [{ value: 'published', label: "E'lon qilingan" }, { value: 'draft', label: 'Qoralama' }] },
+    ],
     attachments: {
       table: 'post_media',
       fk: 'post_id',
@@ -137,7 +145,8 @@ export const RESOURCES: Record<string, Resource> = {
     fields: [
       SITE_FIELD,
       { name: 'title', label: 'Nomi', type: 'i18n', required: true },
-      { name: 'description', label: 'Tavsif', type: 'i18n-textarea' },
+      { name: 'slug', label: 'Havola (slug)', type: 'slug', from: 'title', help: 'Bo‘sh qoldirsangiz nomidan avtomatik yaratiladi' },
+      { name: 'description', label: 'Tavsif (Markdown)', type: 'i18n-markdown' },
       { name: 'location', label: 'Manzil / joy', type: 'i18n' },
       { name: 'starts_at', label: 'Boshlanish vaqti', type: 'datetime', required: true },
       { name: 'ends_at', label: 'Tugash vaqti', type: 'datetime' },
@@ -231,19 +240,33 @@ export const RESOURCES: Record<string, Resource> = {
       { label: "Ko'rinadi", field: 'published', kind: 'bool' },
     ],
     orderBy: { column: 'sort_order', ascending: true },
+    filters: [
+      {
+        field: 'group_key',
+        label: 'Guruh',
+        options: [
+          { value: 'leadership', label: 'Rahbariyat' },
+          { value: 'responsible', label: "Mas'ullar" },
+          { value: 'teacher', label: "O'qituvchilar" },
+          { value: 'staff', label: 'Xodimlar' },
+        ],
+      },
+    ],
   },
 
   programs: {
     key: 'programs',
     table: 'programs',
-    plural: "Qabul yo'nalishlari",
+    plural: "Yo'nalishlar",
     singular: "Yo'nalish",
     hasSite: false,
     mainOnly: true,
     fields: [
       { name: 'name', label: 'Yo‘nalish nomi', type: 'i18n', required: true },
       { name: 'slug', label: 'Havola (slug)', type: 'slug', from: 'name' },
-      { name: 'description', label: 'Tavsif', type: 'i18n-textarea' },
+      { name: 'description', label: 'Qisqa tavsif', type: 'i18n-textarea', help: "Kartochkada ko'rinadi" },
+      { name: 'body', label: 'Batafsil (Markdown)', type: 'i18n-markdown', help: "Yo'nalish sahifasida: kasb, o'quv rejasi, qabul talablari" },
+      { name: 'cover_url', label: 'Rasm', type: 'image' },
       { name: 'duration', label: "Ta'lim muddati", type: 'i18n', help: 'Masalan: 2 yil 10 oy' },
       { name: 'study_form', label: "Ta'lim shakli", type: 'i18n', help: 'Masalan: Kunduzgi' },
       { name: 'language', label: "Ta'lim tili", type: 'i18n', help: "Masalan: O'zbek, rus" },

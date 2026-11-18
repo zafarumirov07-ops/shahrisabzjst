@@ -9,6 +9,7 @@ import type { Field, Option, Resource } from '@/lib/admin/resources';
 import { DEFAULT_LOCALE, LOCALES, type Locale } from '@/lib/i18n/config';
 import { slugify } from '@/lib/utils';
 import AttachmentsEditor, { type AttachmentItem } from './AttachmentsEditor';
+import { Spinner } from './AdminNav';
 import { FieldInput, LangTabs } from './Fields';
 
 type Values = Record<string, unknown>;
@@ -89,7 +90,7 @@ export default function ResourceForm({
         return;
       }
       setSaved(true);
-      router.push(listHref);
+      router.push(`${listHref}?saved=1`);
       router.refresh();
     });
   }
@@ -133,6 +134,7 @@ export default function ResourceForm({
 
       <div className="flex items-center gap-3">
         <button type="submit" className="btn" disabled={pending}>
+          {pending && <Spinner className="h-4 w-4" />}
           {pending ? 'Saqlanmoqda…' : 'Saqlash'}
         </button>
         <Link href={listHref} className="btn-outline">
