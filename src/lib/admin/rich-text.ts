@@ -156,12 +156,14 @@ export function mdToHtml(md: string): string {
       i++;
     } else if (UL.test(line) || OL.test(line)) {
       const ordered = OL.test(line) && !UL.test(line);
+      const start = ordered ? Number(/^\s*(\d+)/.exec(line)![1]) : 1; // "2." bilan boshlangan ro'yxat raqami saqlanadi
       const items: string[] = [];
       while (i < lines.length && (ordered ? OL : UL).test(lines[i])) {
         items.push(`<li>${inlineToHtml((ordered ? OL : UL).exec(lines[i])![1])}</li>`);
         i++;
       }
-      out.push(`<${ordered ? 'ol' : 'ul'}>${items.join('')}</${ordered ? 'ol' : 'ul'}>`);
+      const open = ordered ? (start > 1 ? `ol start="${start}"` : 'ol') : 'ul';
+      out.push(`<${open}>${items.join('')}</${ordered ? 'ol' : 'ul'}>`);
       prevPara = false;
     } else {
       if (prevPara) out.push('<div><br></div>');
@@ -353,7 +355,8 @@ function walk(container: Node, st: State) {
     } else if (tag === 'UL' || tag === 'OL') {
       flushPara(st);
       const items = listItems(el).map((t) => escapeLineStart(t));
-      if (items.length) st.out.push(items.map((t, k) => `${tag === 'OL' ? `${k + 1}. ` : '- '}${t}`).join('\n'));
+      const first = tag === 'OL' ? Math.max(1, parseInt(el.getAttribute('start') ?? '1', 10) || 1) : 1;
+      if (items.length) st.out.push(items.map((t, k) => `${tag === 'OL' ? `${first + k}. ` : '- '}${t}`).join('\n'));
     } else if (tag === 'IMG') {
       flushPara(st);
       const src = el.getAttribute('src') ?? '';
@@ -374,6 +377,95 @@ export function htmlToMd(root: Node): string {
   walk(root, st);
   flushPara(st);
   return st.out.join('\n\n');
+}
+
+/* ------------------------------------------------------------------ */
+/* Avtomatik tartiblash ("Tartiblash" tugmasi)                         */
+/* ------------------------------------------------------------------ */
+
+/** Bir qatordagi matnni tozalaydi: bo'shliqlar, tinish belgilari, apostrof va tirnoq */
+function tidyLine(l: string, lang: string): string {
+  let s = l.replace(/[ \t ]+/g, ' ').trim();
+  if (!s || /https?:\/\/|www\./.test(s)) return s;
+  if (lang === 'uz') {
+    s = s
+      .replace(/([oOgG])[’‘'`ʼʻ´]/g, '$1‘') // o‘ g‘
+      .replace(/(\p{L})[’'`ʼʻ´](?=\p{L})/gu, '$1’'); // tutuq belgisi: ta’lim
+  }
+  if (lang === 'uz' || lang === 'en') s = s.replace(/"([^"\n]{1,300})"/g, '“$1”');
+  return s
+    .replace(/\s+([,;:!?])/g, '$1')
+    .replace(/\s+\.(?!\.)/g, '.')
+    .replace(/([,;])(?=\p{L})/gu, '$1 ')
+    .replace(/(\p{Ll}[.!?])(?=\p{Lu})/gu, '$1 ');
+}
+
+type Piece = { t: 'h' | 'li' | 'ol' | 'p' | 'num'; s: string; n?: string };
+
+/**
+ * Joylangan (ayniqsa Word'dan) xom matnni chiroyli tuzilmaga keltiradi:
+ *  - "1. Sarlavha" (qisqa, nuqtasiz) -> sarlavha;  "a) ...", "- ...", "• ..." -> ro'yxat bandi
+ *  - ikki qatorga bo'linib qolgan gaplar birlashtiriladi, har bir abzats orasiga bo'sh qator qo'yiladi
+ *  - ortiqcha bo'shliqlar, tinish belgilaridan keyingi bo'shliq, apostrof (o‘ g‘ ’) va tirnoq to'g'rilanadi
+ */
+export function tidyMd(md: string, lang: string = 'uz'): string {
+  const pieces: Piece[] = [];
+  for (const raw of md.replace(/\r\n?/g, '\n').split('\n')) {
+    const line = raw.trim();
+    if (!line) continue;
+    let m: RegExpExecArray | null;
+
+    if ((m = /^#{1,6}\s+(.*)$/.exec(line))) {
+      pieces.push({ t: 'h', s: tidyLine(m[1], lang) });
+    } else if ((m = /^(?:\\?[-•–—*]\s+|[A-Za-zЀ-ӿ]\)\s*|\d+\)\s*)(\S.*)$/.exec(line))) {
+      pieces.push({ t: 'li', s: tidyLine(m[1], lang) });
+    } else if ((m = /^(\d+)\\?[.)]\s*(\S.*)$/.exec(line))) {
+      const rest = tidyLine(m[2], lang);
+      if (/;$/.test(rest)) pieces.push({ t: 'li', s: rest });
+      else if (rest.length <= 120 && !/[.,:]$/.test(rest)) pieces.push({ t: 'num', s: rest, n: m[1] });
+      else pieces.push({ t: 'p', s: `${m[1]}\\. ${rest}` });
+    } else {
+      pieces.push({ t: 'p', s: tidyLine(line, lang) });
+    }
+  }
+
+  // Qisqa raqamli qator: yolg'iz bo'lsa bo'lim sarlavhasi, ketma-ket kelsa raqamli ro'yxat
+  const types = pieces.map((p) => p.t);
+  pieces.forEach((p, i) => {
+    if (p.t !== 'num') return;
+    if (types[i - 1] === 'num' || types[i + 1] === 'num') p.t = 'ol';
+    else {
+      p.t = 'h';
+      p.s = `${p.n}. ${p.s}`;
+    }
+  });
+
+  // Gap oxirigacha yetmay yangi qatorga o'tgan matnni birlashtirish
+  const joined: Piece[] = [];
+  for (const p of pieces) {
+    const prev = joined[joined.length - 1];
+    if (p.t === 'p' && prev?.t === 'p' && !/[.!?:;…”»)]$/.test(prev.s) && /^\p{Ll}/u.test(p.s)) prev.s += ` ${p.s}`;
+    else joined.push({ ...p });
+  }
+
+  // Ketma-ket ro'yxat bandlari bitta blok, qolganlari alohida blok
+  const blocks: string[] = [];
+  let list: Piece[] = [];
+  const flush = () => {
+    if (list.length) blocks.push(list.map((p) => (p.t === 'ol' ? `${p.n}. ${p.s}` : `- ${p.s}`)).join('\n'));
+    list = [];
+  };
+  for (const p of joined) {
+    if (p.t === 'li' || p.t === 'ol') {
+      if (list.length && list[0].t !== p.t) flush();
+      list.push(p);
+      continue;
+    }
+    flush();
+    blocks.push(p.t === 'h' ? `## ${p.s}` : p.s);
+  }
+  flush();
+  return blocks.join('\n\n');
 }
 
 /** Joylangan (paste) HTML'dan toza Markdown olish: faqat qalin/qiya/sarlavha/ro'yxat/havola saqlanadi */

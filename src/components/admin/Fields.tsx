@@ -54,7 +54,7 @@ export function LangTabs({
  * Matn muharriri. Odatda vizual (belgilarsiz): qalin/qiya tugmalar bilan.
  * Faqat vizual ko'rsatib bo'lmaydigan murakkab Markdown (jadval, kod, iqtibos...) bo'lsa, eski Markdown rejimi ochiladi.
  */
-function MarkdownEditor({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+function MarkdownEditor({ value, onChange, lang }: { value: string; onChange: (v: string) => void; lang: string }) {
   const [seen, setSeen] = useState(value);
   const [raw, setRaw] = useState(() => needsRaw(value));
   const [preview, setPreview] = useState(false);
@@ -78,6 +78,7 @@ function MarkdownEditor({ value, onChange }: { value: string; onChange: (v: stri
           <RichEditor
             value={value}
             onChange={emit}
+            lang={lang}
             preview={preview}
             onPreview={() => setPreview((v) => !v)}
             previewContent={
@@ -261,7 +262,7 @@ export function FieldInput({ field, value, onChange, lang, siteOptions, options 
           {field.type === 'i18n-textarea' && (
             <textarea id={id} className="input" rows={3} value={current} onChange={(e) => set(e.target.value)} lang={lang} />
           )}
-          {field.type === 'i18n-markdown' && <MarkdownEditor value={current} onChange={set} />}
+          {field.type === 'i18n-markdown' && <MarkdownEditor value={current} onChange={set} lang={lang} />}
           {help}
         </div>
       );

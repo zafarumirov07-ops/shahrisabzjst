@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type ClipboardEvent, type ReactNode } from 'react';
 import Icon, { type IconName } from '@/components/Icon';
-import { htmlToMd, mdToHtml, normalizeLink, pastedHtmlToMd } from '@/lib/admin/rich-text';
+import { htmlToMd, mdToHtml, normalizeLink, pastedHtmlToMd, tidyMd } from '@/lib/admin/rich-text';
 import MediaPicker from './MediaPicker';
 
 /**
@@ -16,14 +16,18 @@ export default function RichEditor({
   onPreview,
   preview,
   previewContent,
+  lang = 'uz',
 }: {
   value: string;
   onChange: (v: string) => void;
   onPreview: () => void;
   preview: boolean;
   previewContent: ReactNode;
+  lang?: string;
 }) {
   const boxRef = useRef<HTMLDivElement>(null);
+  // "Tartiblash" dan oldingi matn: "Qaytarish" uchun
+  const [undo, setUndo] = useState<string | null>(null);
   const lastRef = useRef<string | null>(null);
   const rangeRef = useRef<Range | null>(null);
   const [picker, setPicker] = useState(false);
@@ -36,6 +40,7 @@ export default function RichEditor({
     if (lastRef.current !== value) {
       el.innerHTML = mdToHtml(value);
       lastRef.current = value;
+      setUndo(null);
     }
   }, [value]);
 
@@ -55,6 +60,31 @@ export default function RichEditor({
     lastRef.current = md;
     onChange(md);
   }, [onChange]);
+
+  /** Muharrir matnini butunlay almashtiradi (Tartiblash / Qaytarish) */
+  function replaceAll(md: string) {
+    const el = boxRef.current;
+    if (!el) return;
+    el.innerHTML = mdToHtml(md);
+    lastRef.current = md;
+    onChange(md);
+  }
+
+  function tidy() {
+    const el = boxRef.current;
+    if (!el) return;
+    const before = htmlToMd(el);
+    const after = tidyMd(before, lang);
+    if (!before.trim() || after === before) return;
+    setUndo(before);
+    replaceAll(after);
+  }
+
+  function undoTidy() {
+    if (undo === null) return;
+    replaceAll(undo);
+    setUndo(null);
+  }
 
   // Tanlov o'zgarganda B / I tugmalari holati
   useEffect(() => {
@@ -129,28 +159,25 @@ export default function RichEditor({
   }
 
   const btn = (on: boolean) =>
-    `flex h-8 w-8 items-center justify-center rounded-lg transition ${
+    `inline-flex h-9 items-center gap-1.5 rounded-lg px-2 text-[13px] font-medium transition sm:px-2.5 ${
       on ? 'bg-surface text-fg shadow-sm' : 'text-muted hover:bg-surface hover:text-fg'
     }`;
 
-  const tools: Array<{ icon: IconName; title: string; on?: boolean; run: () => void }> = [
-    { icon: 'heading', title: 'Sarlavha', run: heading },
-    { icon: 'bold', title: 'Qalin (Ctrl+B)', on: active.bold, run: () => exec('bold') },
-    { icon: 'italic', title: 'Qiya (Ctrl+I)', on: active.italic, run: () => exec('italic') },
-    { icon: 'list', title: 'Ro‘yxat', run: () => exec('insertUnorderedList') },
-    { icon: 'link', title: 'Havola (avval matnni belgilang)', run: link },
-    {
-      icon: 'image',
-      title: 'Kutubxonadan rasm qo‘shish',
-      run: () => {
-        setPicker(true);
-      },
-    },
+  const tools: Array<{ icon: IconName; label: string; title: string; on?: boolean; run: () => void }> = [
+    { icon: 'heading', label: 'Sarlavha', title: 'Bo‘lim sarlavhasi (qayta bossangiz oddiy matn bo‘ladi)', run: heading },
+    { icon: 'bold', label: 'Qalin', title: 'Qalin (Ctrl+B)', on: active.bold, run: () => exec('bold') },
+    { icon: 'italic', label: 'Qiya', title: 'Qiya (Ctrl+I)', on: active.italic, run: () => exec('italic') },
+    { icon: 'list', label: 'Ro‘yxat', title: 'Nuqtali ro‘yxat', run: () => exec('insertUnorderedList') },
+    { icon: 'olist', label: 'Raqamli', title: 'Raqamli ro‘yxat', run: () => exec('insertOrderedList') },
+    { icon: 'link', label: 'Havola', title: 'Havola (avval matnni belgilang)', run: link },
+    { icon: 'image', label: 'Rasm', title: 'Kutubxonadan rasm qo‘shish', run: () => setPicker(true) },
   ];
+
+  const keepFocus = (e: { preventDefault: () => void }) => e.preventDefault(); // belgilangan matn yo'qolmasligi uchun
 
   return (
     <div className="overflow-hidden rounded-xl" style={{ background: 'var(--surface-2)' }}>
-      <div className="flex flex-wrap items-center gap-1 p-2" style={{ borderBottom: '0.5px solid var(--line)' }}>
+      <div className="flex flex-wrap items-center gap-0.5 p-2" style={{ borderBottom: '0.5px solid var(--line)' }}>
         {tools.map((t) => (
           <button
             key={t.icon}
@@ -158,14 +185,34 @@ export default function RichEditor({
             title={t.title}
             aria-label={t.title}
             aria-pressed={t.on}
-            // tugma bosilganda muharrirdagi belgilangan matn yo'qolmasligi uchun
-            onMouseDown={(e) => e.preventDefault()}
+            disabled={preview}
+            onMouseDown={keepFocus}
             onClick={t.run}
-            className={btn(!!t.on)}
+            className={`${btn(!!t.on)} disabled:opacity-40`}
           >
             <Icon name={t.icon} className="h-[18px] w-[18px]" />
+            <span className="hidden lg:inline">{t.label}</span>
           </button>
         ))}
+        <span className="mx-1 hidden h-5 w-px sm:block" style={{ background: 'var(--line)' }} />
+        <button
+          type="button"
+          title="Joylangan matnni avtomatik tartibga keltiradi: sarlavhalar, ro‘yxatlar, bo‘sh joylar, apostrof va tirnoq"
+          disabled={preview}
+          onMouseDown={keepFocus}
+          onClick={tidy}
+          className={`${btn(false)} disabled:opacity-40`}
+          style={{ color: 'var(--accent)' }}
+        >
+          <Icon name="wand" className="h-[18px] w-[18px]" />
+          Tartiblash
+        </button>
+        {undo !== null && !preview && (
+          <button type="button" onMouseDown={keepFocus} onClick={undoTidy} className={btn(false)} title="Tartiblashdan oldingi matnni qaytarish">
+            <Icon name="undo" className="h-[18px] w-[18px]" />
+            Qaytarish
+          </button>
+        )}
         <button
           type="button"
           onClick={onPreview}
@@ -186,11 +233,20 @@ export default function RichEditor({
         suppressContentEditableWarning
         role="textbox"
         aria-multiline="true"
-        data-placeholder="Matnni shu yerga yozing. Belgilar (tirnoq, tire, ...) aynan yozganingizdek chiqadi."
-        onInput={emit}
+        data-placeholder="Matnni shu yerga yozing yoki joylang. Belgilar (tirnoq, tire, ...) aynan yozganingizdek chiqadi."
+        onInput={() => {
+          setUndo(null);
+          emit();
+        }}
         onPaste={onPaste}
         onBlur={emit}
       />
+      {!preview && (
+        <p className="px-4 pb-3 text-xs text-muted" style={{ borderTop: '0.5px solid var(--line)', paddingTop: '0.6rem' }}>
+          Enter, yangi qator. Bo‘sh qator, yangi abzats. Bo‘lim nomini <b>Sarlavha</b> tugmasi bilan belgilang, bandlarni{' '}
+          <b>Ro‘yxat</b> bilan yozing. Boshqa joydan ko‘chirgan matn tartibsiz bo‘lsa, <b>Tartiblash</b> ni bosing.
+        </p>
+      )}
       {picker && (
         <MediaPicker
           kinds={['image']}
