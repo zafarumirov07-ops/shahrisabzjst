@@ -19,6 +19,84 @@
   --glass: rgba(5, 35, 63, 0.9);
   --cta: #4ade80;             /* asosiy tugma: yorqin yashil */
   --cta-fg: #04223d;
+
+  /* Brend palitrasi (Tailwind: navy / sky / leaf). Kanallar: rgb(var(--x) / alfa) uchun */
+  --navy-rgb: 5 35 63;
+  --navy-2-rgb: 10 60 99;
+  --navy-3-rgb: 13 84 120;
+  --sky-rgb: 56 189 248;
+  --sky-soft: #e0f4fe;
+  --leaf-rgb: 74 222 128;
+  --leaf-deep-rgb: 22 163 74;
+  --ink: #04223d;             /* yorqin aksent ustidagi matn */
+  --shade-rgb: 3 26 48;       /* rasm ustidagi qoraytirish */
+  --glow: rgba(74, 222, 128, 0.35);
+  --hero-grad: linear-gradient(135deg, #031a30 0%, #06335a 52%, #0a5f86 100%);
+  --panel-grad: linear-gradient(135deg, #052542, #0a3c63);
+  --card-grad: linear-gradient(145deg, #06335a, #0b5a7c);
+  --banner-grad: linear-gradient(120deg, #05233f 0%, #0a5f86 55%, #16a34a 135%);
+  --thumb-grad: linear-gradient(to bottom right, #cdeefd, #d4f7df);
+  --hero-pattern: radial-gradient(rgba(255, 255, 255, 0.18) 1px, transparent 1px);
+  --hero-pattern-size: 26px 26px;
+}
+
+/*
+ * Ta'lim sifati sayti: o'sha tuzilma, boshqa xarakter.
+ * Ko'mir-qora + to'q sariq: muhandislik, texnik aniqlik, zamonaviy sifat. Hero'da chizma qog'ozi katagi.
+ */
+[data-site='talimsifati'] {
+  --bg: #f3f4f6;
+  --surface: #ffffff;
+  --surface-2: #e9ebef;
+  --accent-fg: #ffffff;
+  --sky-soft: #eef0f3;
+  --fg: #111418;
+  --muted: #5a616b;
+  --line: rgba(17, 20, 24, 0.11);
+  --accent: #ea580c;
+  --accent-soft: rgba(234, 88, 12, 0.1);
+  --green: #c2410c;
+  --green-soft: rgba(249, 115, 22, 0.13);
+  --link: #c2410c;
+  --glass: rgba(15, 17, 21, 0.9);
+  --cta: #f97316;
+  --cta-fg: #111418;
+
+  --navy-rgb: 20 23 28;
+  --navy-2-rgb: 33 37 44;
+  --navy-3-rgb: 52 58 68;
+  --sky-rgb: 148 163 184;
+  --leaf-rgb: 249 115 22;
+  --leaf-deep-rgb: 194 65 12;
+  --ink: #111418;
+  --shade-rgb: 13 15 18;
+  --glow: rgba(249, 115, 22, 0.35);
+  --hero-grad: linear-gradient(135deg, #0d0f12 0%, #1c2026 55%, #2b3038 100%);
+  --panel-grad: linear-gradient(135deg, #15181d, #262a31);
+  --card-grad: linear-gradient(145deg, #1c2026, #343a44);
+  --banner-grad: linear-gradient(120deg, #0d0f12 0%, #2b3038 55%, #c2410c 140%);
+  --thumb-grad: linear-gradient(to bottom right, #e6e8eb, #fde3cf);
+  /* chizma qog'ozi: to'g'ri katak */
+  --hero-pattern: linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  --hero-pattern-size: 44px 44px;
+}
+
+[data-site='talimsifati'][data-theme='dark'] {
+  --bg: #0b0c0f;
+  --surface: #16181d;
+  --surface-2: #1f2228;
+  --fg: #eceef1;
+  --muted: #9ba2ad;
+  --line: rgba(220, 225, 235, 0.13);
+  --accent: #fb923c;
+  --accent-fg: #111418;
+  --accent-soft: rgba(251, 146, 60, 0.15);
+  --green: #fb923c;
+  --green-soft: rgba(251, 146, 60, 0.15);
+  --link: #fdba74;
+  --glass: rgba(18, 20, 24, 0.92);
+  --thumb-grad: linear-gradient(to bottom right, #1f2228, #3a2416);
 }
 
 [data-theme='dark'] {
@@ -38,7 +116,8 @@
   color-scheme: dark;
 }
 
-[data-contrast='high'] {
+/* :root bilan kuchaytirilgan: Ta'lim sifati mavzusidan ham ustun turishi kerak */
+:root[data-contrast='high'] {
   --bg: #000000;
   --surface: #000000;
   --surface-2: #000000;
@@ -90,7 +169,7 @@ body {
 @keyframes sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes pop-in { from { opacity: 0; transform: translateY(-6px) scale(0.98); } to { opacity: 1; transform: none; } }
-@keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.55); } 100% { box-shadow: 0 0 0 16px rgba(74, 222, 128, 0); } }
+@keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgb(var(--leaf-rgb) / 0.55); } 100% { box-shadow: 0 0 0 16px rgb(var(--leaf-rgb) / 0); } }
 
 /* Hero: sahifa ochilganda ketma-ket paydo bo'ladi */
 .hero-in { opacity: 0; animation: rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
@@ -138,7 +217,7 @@ body {
     background: var(--cta, #4ade80);
     color: var(--cta-fg, #04223d);
   }
-  .btn:hover { filter: brightness(1.05); box-shadow: 0 8px 26px rgba(74, 222, 128, 0.4); }
+  .btn:hover { filter: brightness(1.05); box-shadow: 0 8px 26px var(--glow); }
   .btn::after {
     content: ''; position: absolute; inset: 0; width: 40%;
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);

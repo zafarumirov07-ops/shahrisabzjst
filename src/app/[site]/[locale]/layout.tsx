@@ -50,7 +50,8 @@ export default async function SiteLayout({
   const settings = await getSettings(site);
 
   return (
-    <html lang={HTML_LANG[locale]} className={sans.variable} suppressHydrationWarning>
+    // data-site: Ta'lim sifati sayti o'z rang mavzusini oladi (globals.css)
+    <html lang={HTML_LANG[locale]} data-site={site} className={sans.variable} suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />

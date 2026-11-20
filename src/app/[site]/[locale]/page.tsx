@@ -28,7 +28,9 @@ import { plainText } from '@/lib/utils';
 export const revalidate = 60;
 
 const HERO_IMAGE = '/images/campus.jpg';
-const HERO_GRADIENT = 'linear-gradient(135deg,#031a30 0%,#06335a 52%,#0a5f86 100%)';
+const QUALITY_HERO_IMAGE = '/images/talimsifati-hero.webp'; // Ta'lim sifati: texnikum darvozasi
+// Ranglar globals.css dagi mavzu o'zgaruvchilaridan: Ta'lim sifati saytida o'zi indigo/oltinga o'tadi
+const HERO_GRADIENT = 'var(--hero-grad)';
 
 export default async function HomePage({ params }: { params: SiteParams }) {
   const ctx = await getCtx(params);
@@ -59,7 +61,7 @@ function highlightLastWords(text: string, count = 2) {
 }
 
 const ctaDark =
-  'inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-2.5 text-[15px] font-bold text-[#04223d] transition active:scale-[0.97] hover:bg-white/90';
+  'inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-2.5 text-[15px] font-bold text-ink transition active:scale-[0.97] hover:bg-white/90';
 
 /** Bosh sahifa tepasidagi katta gradient "hero" */
 async function Hero({
@@ -74,7 +76,8 @@ async function Hero({
   const isQuality = site === 'talimsifati';
   const title = tr(hero.title, locale) || (isQuality ? dict.quality.heroTitle : dict.home.heroTitle);
   const subtitle = tr(hero.subtitle, locale) || (isQuality ? dict.quality.heroSubtitle : dict.home.heroSubtitle);
-  const image = hero.image_url || HERO_IMAGE;
+  // Admin sozlamalarida rasm berilsa o'sha, aks holda har sayt o'z standart rasmi
+  const image = hero.image_url || (isQuality ? QUALITY_HERO_IMAGE : HERO_IMAGE);
 
   return (
     <section className="container-page pt-3 sm:pt-4">
@@ -84,7 +87,7 @@ async function Hero({
         <div className="blob absolute -bottom-32 -left-20 -z-10 h-[24rem] w-[24rem] rounded-full bg-leaf/25 blur-3xl" style={{ animationDelay: '-7s' }} />
         <div
           className="absolute inset-0 -z-10 opacity-40"
-          style={{ backgroundImage: 'radial-gradient(rgba(255,255,255,.18) 1px, transparent 1px)', backgroundSize: '26px 26px' }}
+          style={{ backgroundImage: 'var(--hero-pattern)', backgroundSize: 'var(--hero-pattern-size)' }}
         />
 
         <div className="grid items-center gap-10 px-5 pb-28 pt-10 sm:px-12 sm:pt-14 lg:min-h-[640px] lg:grid-cols-[1.05fr_1fr] lg:gap-8 lg:pb-36 lg:pt-14 2xl:px-20">
@@ -93,7 +96,12 @@ async function Hero({
               className="hero-left inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-[13px] font-bold text-leaf ring-1 ring-white/15"
               style={{ animationDelay: '60ms' }}
             >
-              <span className="pulse-ring h-2 w-2 rounded-full bg-leaf" />
+              {isQuality ? (
+                // Ta'lim sifati: muhr (sifat belgisi)
+                <Icon name="shield" className="h-4 w-4" strokeWidth={2.2} />
+              ) : (
+                <span className="pulse-ring h-2 w-2 rounded-full bg-leaf" />
+              )}
               {dict.home.welcome}
             </span>
             <h1 className="display hero-left mt-5" style={{ animationDelay: '160ms' }}>
@@ -111,10 +119,10 @@ async function Hero({
             <div className="relative overflow-hidden rounded-[2.2rem] ring-4 ring-white/15 shadow-ios-lg">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={image} alt="" className="aspect-[5/4] w-full object-cover object-[45%_50%] sm:aspect-[4/3.1]" />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#031a30]/55 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[rgb(var(--shade-rgb)/0.55)] via-transparent to-transparent" />
             </div>
             {badges[0] && (
-              <div className="float-a absolute -bottom-6 left-3 rounded-2xl bg-leaf px-5 py-4 text-[#04223d] shadow-glow sm:-left-6">
+              <div className="float-a absolute -bottom-6 left-3 rounded-2xl bg-leaf px-5 py-4 text-ink shadow-glow sm:-left-6">
                 <p className="text-3xl font-extrabold leading-none tracking-tighter2 sm:text-4xl">{badges[0].value}</p>
                 <p className="mt-1 text-[12.5px] font-bold opacity-80">{badges[0].label}</p>
               </div>
@@ -160,7 +168,7 @@ function QuickRow({
           <Link href={imageHref} className="group relative block h-full min-h-[210px] overflow-hidden rounded-ios shadow-ios-lg">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={image} alt="" className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-110" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#031a30]/90 via-[#031a30]/30 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[rgb(var(--shade-rgb)/0.9)] via-[rgb(var(--shade-rgb)/0.3)] to-transparent" />
             <div className="absolute inset-x-0 bottom-0 p-5 text-white">
               <p className="text-xl font-extrabold leading-tight tracking-tight">{imageTitle}</p>
               <span className="mt-2 inline-flex items-center gap-1.5 text-sm font-bold text-leaf transition group-hover:gap-3">
@@ -172,11 +180,11 @@ function QuickRow({
         </Reveal>
 
         <Reveal anim="right">
-          <div className="grid h-full gap-1 rounded-ios p-2 text-white shadow-ios-lg sm:grid-cols-3" style={{ background: 'linear-gradient(135deg,#052542,#0a3c63)' }}>
+          <div className="grid h-full gap-1 rounded-ios p-2 text-white shadow-ios-lg sm:grid-cols-3" style={{ background: 'var(--panel-grad)' }}>
             {items.map((it) => {
               const inner = (
                 <>
-                  <span className="flex h-12 w-12 items-center justify-center rounded-full bg-leaf/20 text-leaf transition duration-300 group-hover:scale-110 group-hover:bg-leaf group-hover:text-[#04223d]">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-full bg-leaf/20 text-leaf transition duration-300 group-hover:scale-110 group-hover:bg-leaf group-hover:text-ink">
                     <Icon name={it.icon} className="h-6 w-6" />
                   </span>
                   <span className="mt-4 flex items-center gap-1.5 text-lg font-extrabold tracking-tight">
@@ -296,7 +304,7 @@ async function MainHome(ctx: Ctx) {
               <ul className="mt-6 grid gap-3 sm:grid-cols-2">
                 {bullets.map((b) => (
                   <li key={b} className="flex items-start gap-3 text-[15px] font-semibold">
-                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-leaf text-[#04223d]">
+                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-leaf text-ink">
                       <Icon name="check" className="h-3.5 w-3.5" strokeWidth={3} />
                     </span>
                     {b}
@@ -307,10 +315,10 @@ async function MainHome(ctx: Ctx) {
             <Link
               href={`${base}/p/about`}
               className="group mt-8 flex items-center justify-between gap-4 rounded-full px-5 py-3 text-white"
-              style={{ background: 'linear-gradient(135deg,#052542,#0a3c63)' }}
+              style={{ background: 'var(--panel-grad)' }}
             >
               <span className="flex items-center gap-3 text-[15px] font-semibold">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-leaf text-[#04223d]">
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-leaf text-ink">
                   <Icon name="info" className="h-4 w-4" strokeWidth={2.2} />
                 </span>
                 {dict.home.aboutBadge}
@@ -335,11 +343,11 @@ async function MainHome(ctx: Ctx) {
                   <Link
                     href={`${base}/programs/${p.slug}`}
                     className="group relative block h-full overflow-hidden rounded-ios p-6 text-white shadow-ios transition duration-300 hover:-translate-y-1 hover:shadow-ios-lg"
-                    style={{ background: 'linear-gradient(145deg,#06335a,#0b5a7c)' }}
+                    style={{ background: 'var(--card-grad)' }}
                   >
                     <span className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-leaf/15 blur-xl transition duration-500 group-hover:scale-150" />
                     <span className="relative flex items-start justify-between">
-                      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-leaf text-[#04223d]">
+                      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-leaf text-ink">
                         <Icon name="cross" className="h-6 w-6" strokeWidth={2} />
                       </span>
                       {tr(p.duration, locale) && (
@@ -426,12 +434,12 @@ async function MainHome(ctx: Ctx) {
         <Reveal anim="zoom">
           <section
             className="relative isolate overflow-hidden rounded-ios-lg p-7 text-white shadow-ios-lg sm:p-12"
-            style={{ background: 'linear-gradient(120deg,#05233f 0%,#0a5f86 55%,#16a34a 135%)' }}
+            style={{ background: 'var(--banner-grad)' }}
           >
             <div className="blob absolute -right-10 -top-20 -z-10 h-72 w-72 rounded-full bg-sky/30 blur-3xl" />
             <div className="flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-center">
               <div className="flex items-start gap-5">
-                <span className="hidden h-16 w-16 shrink-0 items-center justify-center rounded-full bg-leaf text-[#04223d] sm:flex">
+                <span className="hidden h-16 w-16 shrink-0 items-center justify-center rounded-full bg-leaf text-ink sm:flex">
                   <Icon name="shield" className="h-8 w-8" strokeWidth={1.8} />
                 </span>
                 <div className="max-w-2xl">

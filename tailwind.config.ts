@@ -15,9 +15,15 @@ const config: Config = {
         line: 'var(--line)',
         accent: 'var(--accent)',
         green: 'var(--green)',
-        navy: { DEFAULT: '#05233f', 2: '#0a3c63', 3: '#0d5478' },
-        sky: { DEFAULT: '#38bdf8', soft: '#e0f4fe' },
-        leaf: { DEFAULT: '#4ade80', deep: '#16a34a' },
+        // Brend ranglari ham o'zgaruvchi: Ta'lim sifati saytida indigo/oltin bo'ladi (globals.css)
+        navy: {
+          DEFAULT: 'rgb(var(--navy-rgb) / <alpha-value>)',
+          2: 'rgb(var(--navy-2-rgb) / <alpha-value>)',
+          3: 'rgb(var(--navy-3-rgb) / <alpha-value>)',
+        },
+        sky: { DEFAULT: 'rgb(var(--sky-rgb) / <alpha-value>)', soft: 'var(--sky-soft)' },
+        leaf: { DEFAULT: 'rgb(var(--leaf-rgb) / <alpha-value>)', deep: 'rgb(var(--leaf-deep-rgb) / <alpha-value>)' },
+        ink: 'var(--ink)',
       },
       fontFamily: {
         sans: [
@@ -37,7 +43,7 @@ const config: Config = {
       boxShadow: {
         ios: '0 1px 2px rgba(5,35,63,.05), 0 8px 24px rgba(5,35,63,.07)',
         'ios-lg': '0 2px 6px rgba(5,35,63,.06), 0 22px 48px rgba(5,35,63,.14)',
-        glow: '0 10px 40px rgba(74,222,128,.35)',
+        glow: '0 10px 40px var(--glow)',
       },
       letterSpacing: {
         tighter2: '-0.025em',

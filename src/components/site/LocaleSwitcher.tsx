@@ -40,10 +40,10 @@ export default function LocaleSwitcher({ locale, variant = 'dark' }: { locale: L
           className={
             variant === 'light'
               ? `flex-1 rounded-full px-3 py-2 text-center text-[14px] font-bold transition-colors ${
-                  l === locale ? 'bg-leaf text-[#04223d] shadow-ios' : 'text-muted'
+                  l === locale ? 'bg-leaf text-ink shadow-ios' : 'text-muted'
                 }`
               : `rounded-full px-2.5 py-1 text-[11.5px] font-bold transition-colors ${
-                  l === locale ? 'bg-leaf text-[#04223d]' : 'text-white/75 hover:text-white'
+                  l === locale ? 'bg-leaf text-ink' : 'text-white/75 hover:text-white'
                 }`
           }
         >

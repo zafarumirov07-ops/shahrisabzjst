@@ -53,7 +53,7 @@ export function PageHeader({ title, subtitle }: { title: string; subtitle?: stri
     <div className="container-page pt-3 sm:pt-4">
       <div
         className="relative isolate overflow-hidden rounded-ios-lg px-6 py-10 text-white sm:px-12 sm:py-14"
-        style={{ background: 'linear-gradient(135deg,#031a30 0%,#06335a 55%,#0a5f86 100%)' }}
+        style={{ background: 'var(--hero-grad)' }}
       >
         <div className="blob absolute -right-16 -top-24 -z-10 h-72 w-72 rounded-full bg-sky/30 blur-3xl" />
         <div className="blob absolute -bottom-24 left-1/4 -z-10 h-64 w-64 rounded-full bg-leaf/25 blur-3xl" style={{ animationDelay: '-6s' }} />
@@ -91,7 +91,7 @@ export function PostCard({ post, locale, dict }: { post: Post; locale: Locale; d
             className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#cdeefd] to-[#d4f7df] text-accent">
+          <div className="flex h-full w-full items-center justify-center text-accent" style={{ background: 'var(--thumb-grad)' }}>
             <Icon name="cross" className="h-12 w-12 opacity-60" strokeWidth={1.4} />
           </div>
         )}

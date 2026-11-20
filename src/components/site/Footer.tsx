@@ -30,7 +30,7 @@ export default function Footer({
     <footer className="mt-20 px-3 pb-4 sm:px-5 lg:px-8 2xl:px-12">
       <div
         className="relative isolate mx-auto max-w-[1920px] overflow-hidden rounded-ios-lg p-6 text-white sm:p-12"
-        style={{ background: 'linear-gradient(135deg,#031a30 0%,#06335a 60%,#0a5f86 100%)' }}
+        style={{ background: 'var(--hero-grad)' }}
       >
         <div className="blob absolute -right-20 -top-28 -z-10 h-80 w-80 rounded-full bg-sky/25 blur-3xl" />
         <div className="blob absolute -bottom-32 left-1/3 -z-10 h-72 w-72 rounded-full bg-leaf/20 blur-3xl" style={{ animationDelay: '-7s' }} />

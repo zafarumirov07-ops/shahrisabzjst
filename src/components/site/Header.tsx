@@ -88,7 +88,9 @@ export default function Header({ site, locale, dict }: { site: Site; locale: Loc
           lg..2xl oralig'ida menyu ikkinchi qatorga tushadi, 2xl dan boshlab hammasi bir qatorda. */}
       <div className="glass mx-auto flex max-w-[1920px] flex-wrap items-center justify-between gap-x-3 gap-y-1.5 rounded-[1.75rem] py-2 pl-2 pr-2 text-white shadow-ios-lg ring-1 ring-white/10 sm:pl-3 2xl:flex-nowrap 2xl:rounded-full 2xl:py-1.5">
         <Link href={base || '/'} className="flex min-w-0 flex-1 items-center gap-2.5 2xl:flex-none" aria-label={dict.siteName}>
-          <LogoMark className="h-10 w-10 sm:h-12 sm:w-12" />
+          <LogoMark
+            className={`h-10 w-10 sm:h-12 sm:w-12 ${isQuality ? 'ring-2 ring-leaf/90 ring-offset-2 ring-offset-[rgb(var(--navy-rgb))]' : ''}`}
+          />
           <span className="min-w-0">
             {isQuality && (
               <span className="block text-[13px] font-extrabold leading-tight tracking-tight sm:text-[15px]">
