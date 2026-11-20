@@ -19,10 +19,12 @@ export default function ViewTracker({ postId, site }: { postId?: string; site?: 
       /* sessionStorage yo'q bo'lsa ham hisoblaymiz */
     }
     const db = createClient();
+    // Diqqat: supabase-js rpc() "dangasa": so'rov faqat .then()/await bilan yuboriladi (`void` bilan hech qachon ketmaydi)
+    const noop = () => {};
     if (postId) {
-      void db.rpc('track_post_view', { p_post_id: postId });
+      db.rpc('track_post_view', { p_post_id: postId }).then(noop, noop);
     } else if (site) {
-      void db.rpc('track_page_view', { p_site: site });
+      db.rpc('track_page_view', { p_site: site }).then(noop, noop);
     }
   }, [postId, site]);
 
