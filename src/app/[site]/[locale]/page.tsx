@@ -23,6 +23,7 @@ import {
 } from '@/lib/data';
 import { tr } from '@/lib/i18n/config';
 import { siteUrl } from '@/lib/site';
+import { plainText } from '@/lib/utils';
 
 export const revalidate = 60;
 
@@ -36,7 +37,7 @@ export default async function HomePage({ params }: { params: SiteParams }) {
 
 /** Markdown matndan birinchi abzats va ro'yxat bandlarini oddiy matn ko'rinishida ajratadi */
 function aboutParts(body: string): { intro: string; bullets: string[] } {
-  const clean = (s: string) => s.replace(/\*\*/g, '').replace(/^[-*]\s+/, '').trim();
+  const clean = (s: string) => plainText(s);
   const blocks = body.split(/\n\s*\n/);
   const intro = clean(blocks.find((b) => b.trim() && !b.trim().startsWith('#') && !b.trim().startsWith('-')) ?? '');
   const bullets = body

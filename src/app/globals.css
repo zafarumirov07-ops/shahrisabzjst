@@ -215,5 +215,20 @@ body {
   --tw-prose-td-borders: var(--line);
   max-width: none;
 }
+/* Post matni qanday yozilgan bo'lsa shunday: qator uzilishlari saqlanadi */
+.prose :where(p, li) { white-space: pre-line; }
 .prose img { border-radius: 1.25rem; }
+
+/* Vizual muharrir (admin) */
+.rte { line-height: 1.6; word-break: break-word; }
+.rte:empty::before { content: attr(data-placeholder); color: var(--muted); pointer-events: none; }
+.rte h2 { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; margin: 0.6em 0 0.3em; }
+.rte h3 { font-size: 1.15rem; font-weight: 700; margin: 0.5em 0 0.25em; }
+.rte b, .rte strong { font-weight: 700; }
+.rte i, .rte em { font-style: italic; }
+.rte ul { list-style: disc; padding-left: 1.4rem; margin: 0.3em 0; }
+.rte ol { list-style: decimal; padding-left: 1.4rem; margin: 0.3em 0; }
+.rte a { color: var(--link); text-decoration: underline; }
+.rte img { max-width: 100%; max-height: 18rem; border-radius: 1rem; margin: 0.4em 0; }
+.rte hr { border: 0; border-top: 1px solid var(--line); margin: 0.8em 0; }
 .prose :where(h2) { letter-spacing: -0.02em; }

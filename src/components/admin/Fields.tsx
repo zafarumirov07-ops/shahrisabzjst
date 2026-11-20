@@ -6,7 +6,9 @@ import Icon, { type IconName } from '@/components/Icon';
 import { LOCALES, LOCALE_LABELS, type Locale } from '@/lib/i18n/config';
 import { SOCIAL_KEYS, type Field, type Option } from '@/lib/admin/resources';
 import { toLocalInput } from '@/lib/admin/upload';
+import { needsRaw } from '@/lib/admin/rich-text';
 import MediaPicker from './MediaPicker';
+import RichEditor from './RichEditor';
 
 // Ko'rish rejimi faqat kerak bo'lganda yuklanadi (forma tezroq ochiladi)
 const MarkdownPreview = dynamic(() => import('./MarkdownPreview'), {
@@ -48,7 +50,49 @@ export function LangTabs({
   );
 }
 
-function MarkdownEditor({
+/**
+ * Matn muharriri. Odatda vizual (belgilarsiz): qalin/qiya tugmalar bilan.
+ * Faqat vizual ko'rsatib bo'lmaydigan murakkab Markdown (jadval, kod, iqtibos...) bo'lsa, eski Markdown rejimi ochiladi.
+ */
+function MarkdownEditor({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [seen, setSeen] = useState(value);
+  const [raw, setRaw] = useState(() => needsRaw(value));
+  const [preview, setPreview] = useState(false);
+
+  // Qiymat tashqaridan o'zgarsa (til tabi, avto-tarjima) rejimni qayta aniqlaymiz
+  if (value !== seen) {
+    setSeen(value);
+    setRaw(needsRaw(value));
+  }
+  const emit = (v: string) => {
+    setSeen(v);
+    onChange(v);
+  };
+
+  return (
+    <div>
+      {raw ? (
+        <RawMarkdownEditor value={value} onChange={emit} />
+      ) : (
+        <>
+          <RichEditor
+            value={value}
+            onChange={emit}
+            preview={preview}
+            onPreview={() => setPreview((v) => !v)}
+            previewContent={
+              <div className="prose min-h-[10rem] max-w-none p-4">
+                {value.trim() ? <MarkdownPreview value={value} /> : <p className="text-muted">Matn bo‘sh</p>}
+              </div>
+            }
+          />
+        </>
+      )}
+    </div>
+  );
+}
+
+function RawMarkdownEditor({
   value,
   onChange,
   rows = 14,

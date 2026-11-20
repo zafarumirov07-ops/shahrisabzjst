@@ -92,10 +92,15 @@ export function fileSizeLabel(bytes: number | null | undefined): string {
 
 /** Markdown belgilarini olib tashlab, qisqa ko'rinish uchun oddiy matn qaytaradi */
 export function plainText(md: string): string {
+  // Muharrir himoyalagan belgilar (\- \* \# ...) avval chetga olinib, oxirida aynan qaytariladi
+  const kept: string[] = [];
   return md
+    .replace(/\\([!-/:-@[-`{-~])/g, (_, c: string) => `${kept.push(c) - 1}`)
     .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
     .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
-    .replace(/[#>*_`~-]+/g, ' ')
+    .replace(/^\s{0,3}(?:#{1,6}|>|[-*+]|\d+[.)])\s+/gm, '')
+    .replace(/(\*\*|__|~~|[*`])/g, '')
     .replace(/\s+/g, ' ')
+    .replace(/(\d+)/g, (_, n: string) => kept[Number(n)])
     .trim();
 }

@@ -117,7 +117,8 @@ async function pool<T, R>(items: T[], size: number, fn: (x: T, i: number) => Pro
   return out;
 }
 
-const LINE_PREFIX = /^(\s*(?:#{1,6}\s+|>\s*|[-*+]\s+|\d+[.)]\s+))/;
+// Oxirgi ikki variant: muharrir himoyalagan qator boshi (\- , \# , 1\. ) ham tarjimaga kirmaydi
+const LINE_PREFIX = /^(\s*(?:#{1,6}\s+|>\s*|[-*+]\s+|\d+[.)]\s+|\\[-+#>=]+\s*|\d+\\[.)]\s+))/;
 const SKIP_LINE = /^\s*(?:!\[[^\]]*\]\([^)]*\)\s*|https?:\/\/\S+\s*|[-*_]{3,}\s*|```.*)$/;
 
 type Piece = { prefix: string; body: string; skip: boolean; tokens: string[] };
@@ -125,7 +126,8 @@ type Piece = { prefix: string; body: string; skip: boolean; tokens: string[] };
 /** Havola manzillari va tayyor URL larni almashtirib qo'yadi (tarjimada buzilmasligi uchun) */
 function protect(line: string): { text: string; tokens: string[] } {
   const tokens: string[] = [];
-  const text = line.replace(/\]\(([^)\s]+)\)|https?:\/\/[^\s)]+|[\w.+-]+@[\w-]+\.[\w.-]+/g, (m) => {
+  // Havola manzili, URL, e-pochta va himoyalangan belgilar (\* \_ \` ...) tarjimada o'zgarmaydi
+  const text = line.replace(/\]\(([^)\s]+)\)|https?:\/\/[^\s)]+|[\w.+-]+@[\w-]+\.[\w.-]+|\\[!-/:-@[-`{-~]/g, (m) => {
     tokens.push(m);
     return `[[${tokens.length - 1}]]`;
   });
