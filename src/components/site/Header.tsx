@@ -37,10 +37,20 @@ export function buildNav(site: Site, locale: Locale, dict: Dict): NavGroup[] {
     ],
   };
 
+  const resources: NavGroup = {
+    label: dict.nav.resourcesGroup,
+    icon: 'book',
+    children: [
+      { href: `${base}/library`, label: dict.nav.library, icon: 'book' },
+      { href: `${base}/resources`, label: dict.nav.resources, icon: 'globe' },
+    ],
+  };
+
   if (site === 'talimsifati') {
     return [
       { label: dict.nav.home, icon: 'home', href: base || '/' },
       media,
+      resources,
       { label: dict.nav.teamQuality, icon: 'users', href: `${base}/team` },
       { label: dict.nav.gallery, icon: 'image', href: `${base}/gallery` },
       { label: dict.nav.mainSite, icon: 'building', href: siteUrl('main', locale), external: true },
@@ -65,6 +75,7 @@ export function buildNav(site: Site, locale: Locale, dict: Dict): NavGroup[] {
         { href: `${base}/admission`, label: dict.nav.admission, icon: 'info' },
       ],
     },
+    resources,
     media,
     { label: dict.nav.quality, icon: 'shield', href: siteUrl('talimsifati', locale), external: true },
   ];

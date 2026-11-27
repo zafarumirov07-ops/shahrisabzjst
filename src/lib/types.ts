@@ -1,10 +1,13 @@
 import type { I18n } from '@/lib/i18n/config';
 import type { Site } from '@/lib/site';
 
+/** posts jadvalidagi tur: yangilik, e'lon, elektron kutubxona, elektron raqamli resurs */
+export type PostKind = 'news' | 'announcement' | 'library' | 'resource';
+
 export type Post = {
   id: string;
   site: Site;
-  kind: 'news' | 'announcement';
+  kind: PostKind;
   slug: string;
   status: 'draft' | 'published';
   published_at: string | null;
@@ -15,6 +18,10 @@ export type Post = {
   category_id: string | null;
   pinned: boolean;
   view_count: number;
+  /** Kitob yoki resurs joylashgan tashqi sayt (ixtiyoriy) */
+  external_url?: string | null;
+  /** O'qituvchi (RTR) yoki kitob muallifi */
+  author?: string | null;
 };
 
 export type PostMedia = {
@@ -131,7 +138,7 @@ export type SiteSettings = {
   };
 };
 
-export type SearchType = 'news' | 'announcement' | 'event' | 'album' | 'program' | 'page';
+export type SearchType = PostKind | 'event' | 'album' | 'program' | 'page';
 
 export type SearchHit = {
   type: SearchType;

@@ -66,9 +66,86 @@ export type Resource = {
   attachments?: AttachmentsConfig;
   /** Ro'yxat ustidagi filtrlar (qiymat bo'yicha aniq moslik) */
   filters?: ListFilter[];
+  /** Bir jadvalni bir necha bo'limga bo'lish: bo'lim faqat shu qiymatli yozuvlarni ko'rsatadi/tahrirlaydi (masalan posts.kind) */
+  scope?: { field: string; values: string[] };
+  /** Saqlashda doim shu qiymatlar yoziladi (maydon formada ko'rinmaydi) */
+  fixed?: Record<string, unknown>;
 };
 
 const SITE_FIELD: Field = { name: 'site', label: 'Qaysi saytda', type: 'site', required: true };
+
+/** "Elektron kutubxona" va "Elektron raqamli resurslar": posts jadvalidagi alohida turdagi postlar */
+function libraryLikeResource(o: {
+  key: string;
+  plural: string;
+  singular: string;
+  kind: 'library' | 'resource';
+  titleLabel: string;
+  authorLabel: string;
+  authorRequired?: boolean;
+  bodyLabel: string;
+  excerptHelp: string;
+  externalHelp: string;
+  attachmentsLabel: string;
+}): Resource {
+  return {
+    key: o.key,
+    table: 'posts',
+    plural: o.plural,
+    singular: o.singular,
+    hasSite: true,
+    setCreatedBy: true,
+    scope: { field: 'kind', values: [o.kind] },
+    fixed: { kind: o.kind },
+    fields: [
+      SITE_FIELD,
+      { name: 'title', label: o.titleLabel, type: 'i18n', required: true },
+      { name: 'author', label: o.authorLabel, type: 'text', required: o.authorRequired },
+      { name: 'slug', label: 'Havola (slug)', type: 'slug', from: 'title', help: 'Bo‘sh qoldirsangiz nomidan avtomatik yaratiladi' },
+      { name: 'excerpt', label: 'Qisqacha mazmun', type: 'i18n-textarea', help: o.excerptHelp },
+      { name: 'body', label: o.bodyLabel, type: 'i18n-markdown' },
+      { name: 'external_url', label: 'Tashqi havola', type: 'url', placeholder: 'https://', help: o.externalHelp },
+      { name: 'cover_url', label: o.kind === 'resource' ? "Rasm (o'qituvchi surati yoki fan muqovasi)" : 'Muqova rasmi', type: 'image' },
+      { name: 'pinned', label: 'Muhim (ro‘yxat boshida turadi)', type: 'checkbox' },
+      {
+        name: 'status',
+        label: 'Holati',
+        type: 'select',
+        required: true,
+        options: [
+          { value: 'draft', label: 'Qoralama (saytda ko‘rinmaydi)' },
+          { value: 'published', label: "E'lon qilish" },
+        ],
+      },
+      {
+        name: 'published_at',
+        label: "E'lon qilish vaqti",
+        type: 'datetime',
+        help: "Kelajakdagi vaqt qo'ysangiz, o'sha vaqtda saytda avtomatik paydo bo'ladi. Bo'sh bo'lsa — hozir.",
+      },
+    ],
+    defaults: { status: 'draft', pinned: false },
+    columns: [
+      { label: 'Nomi', field: 'title', kind: 'i18n' },
+      { label: o.authorLabel, field: 'author', kind: 'text' },
+      { label: 'Sayt', field: 'site', kind: 'site' },
+      { label: 'Holati', field: 'status', kind: 'poststatus' },
+      { label: 'Sana', field: 'published_at', kind: 'date' },
+      { label: "Ko'rilgan", field: 'view_count', kind: 'number' },
+    ],
+    orderBy: { column: 'created_at', ascending: false },
+    filters: [
+      { field: 'status', label: 'Holati', options: [{ value: 'published', label: "E'lon qilingan" }, { value: 'draft', label: 'Qoralama' }] },
+    ],
+    attachments: {
+      table: 'post_media',
+      fk: 'post_id',
+      kinds: ['file', 'image', 'video', 'embed'],
+      textField: 'title',
+      label: o.attachmentsLabel,
+    },
+  };
+}
 
 export const RESOURCES: Record<string, Resource> = {
   posts: {
@@ -114,6 +191,7 @@ export const RESOURCES: Record<string, Resource> = {
       },
     ],
     defaults: { kind: 'news', status: 'draft', pinned: false },
+    scope: { field: 'kind', values: ['news', 'announcement'] },
     columns: [
       { label: 'Sarlavha', field: 'title', kind: 'i18n' },
       { label: 'Turi', field: 'kind', kind: 'badge' },
@@ -135,6 +213,33 @@ export const RESOURCES: Record<string, Resource> = {
       label: 'Rasmlar, videolar va fayllar',
     },
   },
+
+  library: libraryLikeResource({
+    key: 'library',
+    plural: 'Elektron kutubxona',
+    singular: 'Kutubxona materiali',
+    kind: 'library',
+    titleLabel: 'Kitob / material nomi',
+    authorLabel: 'Muallif',
+    bodyLabel: 'Tavsif (Markdown)',
+    excerptHelp: "Ro'yxatda ko'rinadi: muallif, yil, qisqacha mazmun",
+    externalHelp: "Kitob onlayn o'qiladigan sayt manzili (ixtiyoriy). Faylni pastdagi bo'limdan to'g'ridan-to'g'ri yuklash ham mumkin.",
+    attachmentsLabel: 'Kitob fayllari (PDF, Word, ...), muqova rasmlari va videolar',
+  }),
+
+  digital: libraryLikeResource({
+    key: 'digital',
+    plural: "Raqamli ta'lim resurslari (RTR)",
+    singular: 'RTR',
+    kind: 'resource',
+    titleLabel: 'Fan / resurs nomi',
+    authorLabel: "O'qituvchi (F.I.Sh.)",
+    authorRequired: true,
+    bodyLabel: 'Tavsif (Markdown)',
+    excerptHelp: "Kartochkada ko'rinadi: yo'nalish, semestr, soatlar, mavzular soni",
+    externalHelp: "O'qituvchining RTR sayti, masalan https://komilova-huquq.vercel.app (kartochkada \"Resursga o'tish\" tugmasi chiqadi)",
+    attachmentsLabel: "Qo'llanma fayllari, rasmlar, videolar",
+  }),
 
   events: {
     key: 'events',

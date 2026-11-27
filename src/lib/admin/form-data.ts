@@ -53,6 +53,7 @@ export async function buildFormProps(resourceKey: string, id: string | null) {
     if (!data) notFound();
     initial = data as Record<string, unknown>;
     if (res.hasSite && !sites.includes(initial.site as 'main' | 'talimsifati')) notFound();
+    if (res.scope && !res.scope.values.includes(String(initial[res.scope.field]))) notFound();
 
     if (res.attachments) {
       const cfg = res.attachments;

@@ -4,6 +4,7 @@ import Icon, { type IconName } from '@/components/Icon';
 import { tr, type Locale } from '@/lib/i18n/config';
 import type { Dict } from '@/lib/i18n/dictionaries';
 import type { EventRow, Post, Program, Staff } from '@/lib/types';
+import { POST_SECTION } from '@/lib/post-kinds';
 import { highlightRegex } from '@/lib/search';
 import { homeOf } from '@/lib/site';
 import { formatDate, monthDay, plainText } from '@/lib/utils';
@@ -77,8 +78,7 @@ export function EmptyState({ text, icon = 'folder' }: { text: string; icon?: Ico
 }
 
 export function PostCard({ post, locale, dict }: { post: Post; locale: Locale; dict: Dict }) {
-  const section = post.kind === 'announcement' ? 'announcements' : 'news';
-  const href = `${homeOf(post.site, locale)}/${section}/${post.slug}`;
+  const href = `${homeOf(post.site, locale)}/${POST_SECTION[post.kind] ?? 'news'}/${post.slug}`;
   return (
     <article className="card card-hover group flex flex-col overflow-hidden">
       <Link href={href} className="relative block aspect-[16/10] overflow-hidden bg-surface2">
@@ -103,9 +103,13 @@ export function PostCard({ post, locale, dict }: { post: Post; locale: Locale; d
         )}
       </Link>
       <div className="flex flex-1 flex-col p-5">
-        <time className="text-[13px] font-medium text-muted" dateTime={post.published_at ?? undefined}>
-          {formatDate(post.published_at, locale)}
-        </time>
+        {post.kind === 'library' && post.author ? (
+          <p className="truncate text-[13px] font-medium text-muted">{post.author}</p>
+        ) : (
+          <time className="text-[13px] font-medium text-muted" dateTime={post.published_at ?? undefined}>
+            {formatDate(post.published_at, locale)}
+          </time>
+        )}
         <h3 className="mt-1.5 line-clamp-2 text-[19px] font-semibold leading-snug tracking-tight">
           <Link href={href} className="hover:text-accent">
             {tr(post.title, locale)}
@@ -115,6 +119,67 @@ export function PostCard({ post, locale, dict }: { post: Post; locale: Locale; d
           <p className="mt-2 line-clamp-3 text-[15px] leading-relaxed text-muted">{tr(post.excerpt, locale)}</p>
         )}
         <Link href={href} className="link mt-auto inline-flex items-center pt-4 text-[15px] font-medium">
+          {dict.common.readMore}
+          <Icon name="chevron-right" className="h-4 w-4" strokeWidth={2.2} />
+        </Link>
+      </div>
+    </article>
+  );
+}
+
+/** Tashqi havola faqat http(s) bo'lsa ishlatiladi (javascript: kabi manzillar o'tkazilmaydi) */
+export function safeExternalUrl(url: string | null | undefined): string | null {
+  const u = url?.trim();
+  return u && /^https?:\/\//i.test(u) ? u : null;
+}
+
+function initials(name: string): string {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? '')
+    .join('');
+}
+
+/** RTR kartochkasi: o'qituvchi, fan nomi va uning raqamli ta'lim resursiga havola */
+export function ResourceCard({ post, locale, dict }: { post: Post; locale: Locale; dict: Dict }) {
+  const detail = `${homeOf(post.site, locale)}/${POST_SECTION[post.kind] ?? 'resources'}/${post.slug}`;
+  const external = safeExternalUrl(post.external_url);
+  const teacher = post.author?.trim() || '';
+  const excerpt = tr(post.excerpt, locale);
+  return (
+    <article className="card card-hover flex flex-col p-5">
+      <div className="flex items-center gap-3">
+        {post.cover_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={post.cover_url} alt="" loading="lazy" className="h-14 w-14 shrink-0 rounded-full bg-surface2 object-cover" />
+        ) : (
+          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[var(--accent-soft)] text-lg font-bold text-accent">
+            {teacher ? initials(teacher) : <Icon name="user" className="h-6 w-6" />}
+          </span>
+        )}
+        <div className="min-w-0">
+          <p className="text-[12.5px] font-semibold uppercase tracking-wider text-muted">{dict.common.teacher}</p>
+          <p className="truncate text-[16px] font-semibold">{teacher || '—'}</p>
+        </div>
+      </div>
+
+      <h3 className="mt-4 line-clamp-3 text-[19px] font-semibold leading-snug tracking-tight">
+        <Link href={detail} className="hover:text-accent">
+          {tr(post.title, locale)}
+        </Link>
+      </h3>
+      {excerpt && <p className="mt-2 line-clamp-3 text-[15px] leading-relaxed text-muted">{excerpt}</p>}
+
+      <div className="mt-auto flex flex-wrap items-center gap-2 pt-5">
+        {external && (
+          <a href={external} target="_blank" rel="noopener noreferrer" className="btn !px-4 !py-2 text-[14.5px]">
+            {dict.common.openResource}
+            <Icon name="arrow-up-right" className="h-4 w-4" strokeWidth={2.2} />
+          </a>
+        )}
+        <Link href={detail} className="link inline-flex items-center px-2 text-[15px] font-medium">
           {dict.common.readMore}
           <Icon name="chevron-right" className="h-4 w-4" strokeWidth={2.2} />
         </Link>

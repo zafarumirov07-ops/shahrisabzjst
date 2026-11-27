@@ -17,6 +17,8 @@ export default async function PanelLayout({ children }: { children: ReactNode })
   if (staff) {
     nav.push(
       { href: '/admin/r/posts', label: 'Postlar', icon: 'newspaper' },
+      { href: '/admin/r/library', label: 'Elektron kutubxona', icon: 'book' },
+      { href: '/admin/r/digital', label: "Raqamli ta'lim resurslari", icon: 'globe' },
       { href: '/admin/r/events', label: 'Tadbirlar', icon: 'calendar' },
       { href: '/admin/r/albums', label: 'Galereya', icon: 'image' },
       { href: '/admin/r/staff', label: 'Jamoa', icon: 'users' },

@@ -140,7 +140,7 @@ create table if not exists public.categories (
 create table if not exists public.posts (
   id uuid primary key default gen_random_uuid(),
   site text not null default 'main' check (site in ('main', 'talimsifati')),
-  kind text not null default 'news' check (kind in ('news', 'announcement')),
+  kind text not null default 'news' constraint posts_kind_check check (kind in ('news', 'announcement', 'library', 'resource')),
   slug text not null,
   status text not null default 'draft' check (status in ('draft', 'published')),
   -- Kelajakdagi sana qo'yilsa, post o'sha vaqtda avtomatik ko'rinadi (rejalashtirilgan post)
@@ -813,3 +813,10 @@ language sql stable security invoker as $$
 $$;
 
 grant execute on function public.search_content(text, text[], text[], int, int) to anon, authenticated;
+
+
+-- =====================================================================
+-- 2026-11-27: "Elektron kutubxona" (library) va "Raqamli ta'lim resurslari" - RTR (resource)
+-- =====================================================================
+alter table public.posts add column if not exists external_url text;
+alter table public.posts add column if not exists author text;

@@ -18,6 +18,8 @@ const TYPE_ICON: Record<SearchType, IconName> = {
   album: 'image',
   program: 'graduation',
   page: 'file',
+  library: 'book',
+  resource: 'globe',
 };
 
 function hitHref(base: string, h: SearchHit): string {
@@ -26,6 +28,10 @@ function hitHref(base: string, h: SearchHit): string {
       return `${base}/news/${h.slug}`;
     case 'announcement':
       return `${base}/announcements/${h.slug}`;
+    case 'library':
+      return `${base}/library/${h.slug}`;
+    case 'resource':
+      return `${base}/resources/${h.slug}`;
     case 'event':
       return `${base}/events/${h.slug}`;
     case 'album':

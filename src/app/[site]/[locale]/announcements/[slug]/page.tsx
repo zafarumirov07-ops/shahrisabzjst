@@ -15,5 +15,5 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 export default async function AnnouncementDetail({ params }: { params: Params }) {
   const p = await params;
   const ctx = await getCtx(Promise.resolve(p));
-  return <PostDetailPage ctx={ctx} slug={decodeURIComponent(p.slug)} />;
+  return <PostDetailPage ctx={ctx} slug={decodeURIComponent(p.slug)} kinds={['news', 'announcement']} />;
 }

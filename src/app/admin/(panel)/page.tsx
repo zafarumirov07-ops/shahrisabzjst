@@ -2,6 +2,8 @@ import Link from 'next/link';
 import Icon from '@/components/Icon';
 import { allowedSites, requireStaff } from '@/lib/admin/auth';
 import { tr } from '@/lib/i18n/config';
+import { POST_ADMIN_KEY } from '@/lib/post-kinds';
+import type { PostKind } from '@/lib/types';
 import { formatDate } from '@/lib/utils';
 
 const SITE_LABEL = { main: 'Asosiy sayt', talimsifati: "Ta'lim sifati" } as const;
@@ -19,8 +21,8 @@ export default async function Dashboard() {
     supabase.from('posts').select('*', { count: 'exact', head: true }).in('site', sites).eq('status', 'draft'),
     supabase.from('posts').select('*', { count: 'exact', head: true }).in('site', sites).eq('status', 'published').gt('published_at', new Date().toISOString()),
     supabase.from('page_views_daily').select('site, day, views').in('site', sites).gte('day', sinceDay).order('day', { ascending: true }),
-    supabase.from('posts').select('id, site, title, view_count, published_at').in('site', sites).eq('status', 'published').order('view_count', { ascending: false }).limit(8),
-    supabase.from('posts').select('id, site, title, status, published_at, created_at').in('site', sites).order('created_at', { ascending: false }).limit(6),
+    supabase.from('posts').select('id, site, kind, title, view_count, published_at').in('site', sites).eq('status', 'published').order('view_count', { ascending: false }).limit(8),
+    supabase.from('posts').select('id, site, kind, title, status, published_at, created_at').in('site', sites).order('created_at', { ascending: false }).limit(6),
   ]);
 
   // Kunlar bo'yicha tashrif (barcha ruxsat etilgan saytlar yig'indisi)
@@ -97,7 +99,7 @@ export default async function Dashboard() {
             <ol className="space-y-2">
               {(topRes.data ?? []).map((p, i) => (
                 <li key={p.id as string} className="flex items-center justify-between gap-3 text-sm">
-                  <Link href={`/admin/r/posts/${p.id}`} className="min-w-0 truncate hover:underline">
+                  <Link href={`/admin/r/${POST_ADMIN_KEY[p.kind as PostKind] ?? 'posts'}/${p.id}`} className="min-w-0 truncate hover:underline">
                     <span className="mr-2 text-muted">{i + 1}.</span>
                     {tr(p.title, 'uz')}
                   </Link>
@@ -116,7 +118,7 @@ export default async function Dashboard() {
             <ul className="space-y-2">
               {(recentRes.data ?? []).map((p) => (
                 <li key={p.id as string} className="flex items-center justify-between gap-3 text-sm">
-                  <Link href={`/admin/r/posts/${p.id}`} className="min-w-0 truncate hover:underline">
+                  <Link href={`/admin/r/${POST_ADMIN_KEY[p.kind as PostKind] ?? 'posts'}/${p.id}`} className="min-w-0 truncate hover:underline">
                     {tr(p.title, 'uz')}
                   </Link>
                   <span className="chip shrink-0">{p.status === 'draft' ? 'Qoralama' : formatDate(p.published_at as string, 'uz')}</span>

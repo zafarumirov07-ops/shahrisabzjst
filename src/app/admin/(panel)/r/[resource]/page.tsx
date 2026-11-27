@@ -25,6 +25,8 @@ const BADGE_LABEL: Record<string, string> = {
   responsible: "Mas'ul",
   teacher: "O'qituvchi",
   staff: 'Xodim',
+  library: 'Kutubxona',
+  resource: 'Resurs',
 };
 
 function Cell({ col, row }: { col: Column; row: Row }) {
@@ -94,6 +96,7 @@ export default async function ResourceList({
     .from(res.table)
     .select([...cols].join(','), { count: 'exact' })
     .order(res.orderBy.column, { ascending: res.orderBy.ascending });
+  if (res.scope) query = query.in(res.scope.field, res.scope.values);
   if (res.hasSite) {
     const chosen = values.site && sites.includes(values.site as 'main' | 'talimsifati') ? [values.site] : sites;
     query = query.in('site', chosen);

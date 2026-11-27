@@ -104,6 +104,8 @@ export async function saveRecord(
   for (const f of res.fields) {
     if (f.name in values) payload[f.name] = normalizeValue(values[f.name], f);
   }
+  // Bo'lim turini (masalan posts.kind) forma emas, server belgilaydi
+  if (res.fixed) Object.assign(payload, res.fixed);
 
   for (const f of res.fields) {
     if (f.required && isMissing(payload[f.name], f)) {
@@ -158,7 +160,9 @@ export async function saveRecord(
 
   for (let attempt = 0; attempt < 3; attempt++) {
     if (id) {
-      const { data, error } = await supabase.from(res.table).update(payload).eq('id', id).select('id');
+      let upd = supabase.from(res.table).update(payload).eq('id', id);
+      if (res.scope) upd = upd.in(res.scope.field, res.scope.values);
+      const { data, error } = await upd.select('id');
       if (error) lastError = error;
       else if (!data || data.length === 0) {
         return { error: "Saqlab bo'lmadi: yozuv topilmadi yoki ruxsatingiz yo'q" };
@@ -234,7 +238,9 @@ export async function deleteRecord(resourceKey: string, id: string): Promise<Act
   const res = RESOURCES[resourceKey];
   if (!res) return { error: "Noma'lum bo'lim" };
 
-  const { data, error } = await supabase.from(res.table).delete().eq('id', id).select('id');
+  let del = supabase.from(res.table).delete().eq('id', id);
+  if (res.scope) del = del.in(res.scope.field, res.scope.values);
+  const { data, error } = await del.select('id');
   if (error) return { error: `O'chirishda xatolik: ${error.message}` };
   if (!data || data.length === 0) return { error: "O'chirib bo'lmadi: ruxsat yo'q yoki topilmadi" };
 

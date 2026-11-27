@@ -2,17 +2,20 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Icon from '@/components/Icon';
-import { getPostBySlug, getPosts, PAGE_SIZE, searchContent } from '@/lib/data';
+import { getPostBySlug, getPostExtras, getPosts, PAGE_SIZE, searchContent } from '@/lib/data';
 import { tr } from '@/lib/i18n/config';
 import type { Ctx } from '@/lib/ctx';
-import type { Post, PostMedia, SearchHit } from '@/lib/types';
+import { POST_ICON, POST_SECTION, postKindLabel } from '@/lib/post-kinds';
+import type { Post, PostKind, PostMedia, SearchHit } from '@/lib/types';
 import { formatDate, toEmbedUrl } from '@/lib/utils';
 import Markdown from './Markdown';
 import MediaGallery from './MediaGallery';
-import { EmptyState, Grid, PageHeader, Pagination, PostCard, SearchForm } from './ui';
+import { EmptyState, Grid, PageHeader, Pagination, PostCard, ResourceCard, SearchForm, safeExternalUrl } from './ui';
 import ViewTracker from './ViewTracker';
 
-type Kind = 'news' | 'announcement';
+type Kind = PostKind;
+
+const externalHref = safeExternalUrl;
 
 /** Qidiruv natijalarini PostCard ko'rsatadigan Post shakliga keltiradi */
 async function searchPosts(site: Ctx['site'], kind: Kind, q: string, page: number): Promise<{ rows: Post[]; total: number }> {
@@ -33,6 +36,9 @@ async function searchPosts(site: Ctx['site'], kind: Kind, q: string, page: numbe
         view_count: 0,
       }) as unknown as Post,
   );
+  // Qidiruv natijasida o'qituvchi/muallif va havola yo'q: ularni alohida olamiz
+  const extras = await getPostExtras(posts.map((x) => x.id));
+  for (const x of posts) Object.assign(x, extras[x.id] ?? {});
   return { rows: posts, total };
 }
 
@@ -48,7 +54,7 @@ export async function PostListPage({
   q?: string;
 }) {
   const { site, locale, dict, base } = ctx;
-  const section = kind === 'news' ? 'news' : 'announcements';
+  const section = POST_SECTION[kind];
   const query = q.trim().slice(0, 80);
   const { rows, total } = query
     ? await searchPosts(site, kind, query, page)
@@ -56,17 +62,21 @@ export async function PostListPage({
 
   return (
     <>
-      <PageHeader title={kind === 'news' ? dict.nav.news : dict.nav.announcements} />
+      <PageHeader title={postKindLabel(kind, dict)} />
       <div className="container-page py-6 sm:py-8">
         <SearchForm action={`${base}/${section}`} q={query} dict={dict} className="mb-6 max-w-2xl" />
         {rows.length === 0 ? (
-          <EmptyState text={query ? dict.search.none : dict.common.noData} icon={kind === 'news' ? 'newspaper' : 'megaphone'} />
+          <EmptyState text={query ? dict.search.none : dict.common.noData} icon={POST_ICON[kind]} />
         ) : (
           <>
             <Grid>
-              {rows.map((p) => (
-                <PostCard key={p.id} post={p} locale={locale} dict={dict} />
-              ))}
+              {rows.map((p) =>
+                kind === 'resource' ? (
+                  <ResourceCard key={p.id} post={p} locale={locale} dict={dict} />
+                ) : (
+                  <PostCard key={p.id} post={p} locale={locale} dict={dict} />
+                ),
+              )}
             </Grid>
             <Pagination
               page={page}
@@ -187,22 +197,29 @@ function Attachments({ media, ctx }: { media: PostMedia[]; ctx: Ctx }) {
   );
 }
 
-export async function PostDetailPage({ ctx, slug }: { ctx: Ctx; slug: string }) {
+/** kinds: bu manzilda ochilishi mumkin bo'lgan post turlari (boshqa turdagi post bu yerda 404 beradi) */
+export async function PostDetailPage({ ctx, slug, kinds }: { ctx: Ctx; slug: string; kinds: PostKind[] }) {
   const { site, locale, dict, base } = ctx;
   const data = await getPostBySlug(site, slug);
-  if (!data) notFound();
+  if (!data || !kinds.includes(data.post.kind)) notFound();
   const { post, media } = data;
-  const section = post.kind === 'announcement' ? 'announcements' : 'news';
+  const section = POST_SECTION[post.kind];
 
   return (
     <article className="container-page max-w-3xl py-6 sm:py-10">
       <Link href={`${base}/${section}`} className="link inline-flex items-center text-[15px] font-medium">
         <Icon name="chevron-left" className="h-5 w-5" strokeWidth={2.2} />
-        {post.kind === 'announcement' ? dict.nav.announcements : dict.nav.news}
+        {postKindLabel(post.kind, dict)}
       </Link>
 
       <h1 className="large-title mt-4">{tr(post.title, locale)}</h1>
       <p className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted">
+        {post.author && (
+          <span className="inline-flex items-center gap-1.5 font-medium text-fg">
+            <Icon name="user" className="h-4 w-4" />
+            {post.kind === 'resource' ? dict.common.teacher : dict.common.author}: {post.author}
+          </span>
+        )}
         <span className="inline-flex items-center gap-1.5">
           <Icon name="calendar" className="h-4 w-4" />
           <time dateTime={post.published_at ?? undefined}>{formatDate(post.published_at, locale)}</time>
@@ -220,6 +237,18 @@ export async function PostDetailPage({ ctx, slug }: { ctx: Ctx; slug: string }) 
           alt=""
           className="mt-6 max-h-[30rem] w-full rounded-ios-lg object-cover shadow-ios"
         />
+      )}
+
+      {externalHref(post.external_url) && (
+        <a
+          href={externalHref(post.external_url)!}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn mt-6 inline-flex"
+        >
+          {dict.common.openResource}
+          <Icon name="arrow-up-right" className="h-[18px] w-[18px]" strokeWidth={2.2} />
+        </a>
       )}
 
       <div className="mt-8">

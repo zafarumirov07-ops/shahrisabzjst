@@ -19,6 +19,7 @@ import type {
   EventRow,
   Page,
   Post,
+  PostKind,
   PostMedia,
   Program,
   RecentPhoto,
@@ -47,7 +48,7 @@ const nowIso = () => new Date().toISOString();
 
 export async function getPosts(opts: {
   site: Site;
-  kind?: 'news' | 'announcement';
+  kind?: PostKind;
   limit?: number;
   page?: number;
 }): Promise<{ rows: Post[]; total: number }> {
@@ -105,6 +106,22 @@ export async function getPostBySlug(
       .eq('post_id', data.id)
       .order('sort_order', { ascending: true });
     return { post: data as Post, media: (media ?? []) as PostMedia[] };
+  });
+}
+
+/** Qidiruv natijalari uchun: post id -> muallif va tashqi havola */
+export async function getPostExtras(
+  ids: string[],
+): Promise<Record<string, { author: string | null; external_url: string | null }>> {
+  return safe({}, async () => {
+    if (DEMO || ids.length === 0) return {};
+    const db = createPublicClient();
+    if (!db) return {};
+    const { data, error } = await db.from('posts').select('id, author, external_url').in('id', ids);
+    if (error) throw error;
+    return Object.fromEntries(
+      (data ?? []).map((r) => [r.id as string, { author: (r.author as string) ?? null, external_url: (r.external_url as string) ?? null }]),
+    );
   });
 }
 
