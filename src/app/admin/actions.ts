@@ -148,7 +148,8 @@ export async function saveRecord(
   }
 
   // Vaqt qoidalari
-  if (resourceKey === 'posts' && payload.status === 'published' && !payload.published_at) {
+  // posts jadvalidagi barcha bo'limlar (Postlar, Elektron kutubxona, RTR): sana bo'sh bo'lsa saytda ko'rinmaydi
+  if (res.table === 'posts' && payload.status === 'published' && !payload.published_at) {
     payload.published_at = new Date().toISOString();
   }
   if (resourceKey === 'albums' && !payload.published_at) {
