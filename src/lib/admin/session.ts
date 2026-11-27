@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 import type { AppRole } from '@/lib/admin/roles';
 
 /**
- * Admin kirishi Vercel (yoki .env.local) dagi o'zgaruvchilar orqali:
+ * Admin kirishi Vercel (yoki lokal .env) dagi o'zgaruvchilar orqali:
  *   ADMIN_LOGIN / ADMIN_PASSWORD        -> bosh admin (hamma narsa)
  *   EDITOR_LOGIN / EDITOR_PASSWORD      -> ixtiyoriy: faqat asosiy sayt muharriri
  *   QUALITY_LOGIN / QUALITY_PASSWORD    -> ixtiyoriy: faqat "Ta'lim sifati" muharriri

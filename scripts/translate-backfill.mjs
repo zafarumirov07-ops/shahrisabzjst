@@ -1,7 +1,7 @@
 // Mavjud kontentdagi bo'sh ru/en maydonlarni o'zbekchadan avtomatik tarjima qiladi (bo'sh joyni to'ldiradi,
 // qo'lda yozilganga tegmaydi) va "auto_langs" ga belgi qo'yadi. Qayta ishga tushirish xavfsiz va davom ettiriladi.
 //
-// Bepul MyMemory kuniga ~5000 belgi beradi (MYMEMORY_EMAIL .env.local da bo'lsa ~50000), shuning uchun
+// Bepul MyMemory kuniga ~5000 belgi beradi (MYMEMORY_EMAIL .env da bo'lsa ~50000), shuning uchun
 // belgilar soni cheklanadi: avval sarlavhalar, keyin qisqa mazmun, oxirida matnlar (yangi postlar birinchi).
 //
 // Ishlatish:  node scripts/translate-backfill.mjs                    (ko'rish: nechta belgi kerak)

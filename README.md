@@ -34,7 +34,7 @@ Node.js 20+ kerak.
 npm install
 ```
 
-`.env.example` ni `.env.local` ga nusxalab to'ldiring, so'ng:
+`.env.example` ni `.env` ga nusxalab to'ldiring (barcha sozlamalar bitta `.env` faylida, u GitHub'ga tushmaydi), so'ng:
 
 ```bash
 npm run dev

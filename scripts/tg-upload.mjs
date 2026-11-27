@@ -1,20 +1,15 @@
 // Tanlangan Telegram postlarini Supabase'ga joylaydi: rasmlar (Storage 'media' bucket + media jadvali) va postlar.
 // Qayta ishga tushirish xavfsiz: fayllar yo'l bo'yicha, postlar slug bo'yicha yangilanadi.
-// Ishlatish:  node scripts/tg-upload.mjs        (.env.local dagi SUPABASE_SECRET_KEY kerak)
+// Ishlatish:  node scripts/tg-upload.mjs        (.env dagi SUPABASE_SECRET_KEY kerak)
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createClient } from '@supabase/supabase-js';
+import { loadEnv } from './_lib.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const dir = path.join(root, 'tg excport');
-const env = Object.fromEntries(
-  fs
-    .readFileSync(path.join(root, '.env.local'), 'utf8')
-    .split(/\r?\n/)
-    .filter((l) => /^[A-Z_]+=/.test(l))
-    .map((l) => [l.slice(0, l.indexOf('=')), l.slice(l.indexOf('=') + 1)]),
-);
+const env = loadEnv();
 const db = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SECRET_KEY, { auth: { persistSession: false } });
 
 const selected = JSON.parse(fs.readFileSync(path.join(dir, '_selected.json'), 'utf8'));

@@ -1,4 +1,4 @@
-// Skriptlar uchun umumiy yordamchilar: .env.local o'qish, Supabase klienti, argumentlar, parallel ishlov.
+// Skriptlar uchun umumiy yordamchilar: .env o'qish, Supabase klienti, argumentlar, parallel ishlov.
 // Maxfiy kalitlar hech qachon chop etilmaydi.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -7,23 +7,24 @@ import { createClient } from '@supabase/supabase-js';
 
 export const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
+/** .env (asosiy fayl) va bo'lsa .env.local (ustun turadi, Next.js dagi kabi) */
 export function loadEnv() {
-  const file = path.join(root, '.env.local');
-  if (!fs.existsSync(file)) return {};
-  return Object.fromEntries(
-    fs
-      .readFileSync(file, 'utf8')
-      .split(/\r?\n/)
-      .filter((l) => /^[A-Z_0-9]+=/.test(l))
-      .map((l) => [l.slice(0, l.indexOf('=')), l.slice(l.indexOf('=') + 1).trim()]),
-  );
+  const out = {};
+  for (const name of ['.env', '.env.local']) {
+    const file = path.join(root, name);
+    if (!fs.existsSync(file)) continue;
+    for (const l of fs.readFileSync(file, 'utf8').split(/\r?\n/)) {
+      if (/^[A-Z_0-9]+=/.test(l)) out[l.slice(0, l.indexOf('='))] = l.slice(l.indexOf('=') + 1).trim();
+    }
+  }
+  return out;
 }
 
 export const env = { ...loadEnv(), ...process.env };
 
 export function getDb() {
   if (!env.NEXT_PUBLIC_SUPABASE_URL || !env.SUPABASE_SECRET_KEY) {
-    throw new Error('NEXT_PUBLIC_SUPABASE_URL va SUPABASE_SECRET_KEY .env.local da bo‘lishi kerak');
+    throw new Error('NEXT_PUBLIC_SUPABASE_URL va SUPABASE_SECRET_KEY .env da bo‘lishi kerak');
   }
   return createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SECRET_KEY, { auth: { persistSession: false } });
 }
