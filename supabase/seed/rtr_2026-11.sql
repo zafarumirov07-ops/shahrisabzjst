@@ -2,8 +2,7 @@
 -- Raqamli ta'lim resurslari (RTR): o'qituvchilar saytlari (2026-11-27)
 -- Avval migrations/20261127000000_library_resources.sql ishga tushirilgan bo'lishi kerak.
 -- Qayta ishga tushirish xavfsiz: slug bo'yicha yangilanadi.
--- Ma'lumotlar o'qituvchilar saytlaridan olingan. Majidova ning ismi saytda yo'q:
--- admin paneldan to'ldiring.
+-- Ma'lumotlar o'qituvchilar saytlaridan olingan.
 -- =====================================================================
 
 insert into public.posts (site, kind, slug, status, published_at, author, external_url, title, excerpt)
@@ -29,7 +28,7 @@ values
    '{"uz": "50910204 – Davolash ishi · I semestr · 64 soat · 20 mavzu"}'),
 
   ('main', 'resource', 'inson-hayoti-davomida-rivojlanishi', 'published', now(),
-   'Majidova', 'https://majidova-ihdj.vercel.app',
+   'Majidova Nigina', 'https://majidova-ihdj.vercel.app',
    '{"uz": "Inson hayoti davomida rivojlanishi (1-modul)"}',
    '{"uz": "Pearson BTEC · 20 dars · 60 soat"}')
 on conflict (site, slug) do update

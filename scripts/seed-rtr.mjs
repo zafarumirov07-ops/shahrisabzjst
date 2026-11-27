@@ -35,7 +35,7 @@ const RTR = [
   },
   {
     slug: 'inson-hayoti-davomida-rivojlanishi',
-    author: 'Majidova',
+    author: 'Majidova Nigina',
     external_url: 'https://majidova-ihdj.vercel.app',
     title: 'Inson hayoti davomida rivojlanishi (1-modul)',
     excerpt: 'Pearson BTEC · 20 dars · 60 soat',
