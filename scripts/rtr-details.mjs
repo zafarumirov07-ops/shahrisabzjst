@@ -1,5 +1,6 @@
 // RTR yozuvlariga batafsil tavsif (body) va qisqa mazmun (excerpt) yozadi.
 // Ma'lumotlar o'qituvchilarning RTR saytlaridan olingan (2026-11-27).
+// Qisqa mazmun shabloni (kartochkalar bir xil ko'rinishi uchun): Yo'nalish · O'quv yili · N mavzu · N soat
 // Faqat body va excerpt yangilanadi: admin'da kiritilgan ism, rasm va boshqa maydonlarga tegilmaydi.
 // Ishlatish:  node scripts/rtr-details.mjs            (faqat ko'rsatadi)
 //             node scripts/rtr-details.mjs --apply    (bazaga yozadi)
@@ -7,7 +8,7 @@ import { APPLY, getDb } from './_lib.mjs';
 
 const DETAILS = {
   'farmakologiya-va-retseptura-asoslari': {
-    excerpt: "50910208 – Hamshiralik ishi · 2026–2027 o'quv yili · 30 mavzu · 90 soat",
+    excerpt: "Hamshiralik ishi · 2026–2027 o'quv yili · 30 mavzu · 90 soat",
     body: `## Resurs haqida
 
 "Farmakologiya va retseptura asoslari" fani bo'yicha interaktiv raqamli ta'lim resursi. Talaba mavzularni ketma-ket o'rganadi, amaliy mashg'ulotlarda interaktiv mashqlarni bajaradi, o'zlashtirish foizi esa sahifada avtomatik ko'rsatib boriladi.
@@ -38,7 +39,7 @@ Resursga o'tib, 1-mavzudan boshlang. Amaliy mavzularda interaktiv mashqlar bor, 
   },
 
   'oftalmologiyada-hamshiralik-ishi': {
-    excerpt: "Hamshiralik ishi · 15 mavzu · 42 soat · darslik va testlar",
+    excerpt: "Hamshiralik ishi · 2026–2027 o'quv yili · 15 mavzu · 42 soat",
     body: `## Resurs haqida
 
 Ko'z kasalliklarida bemorni parvarish qilishni o'rganish uchun raqamli darslik. Har bir mavzuda uch bosqich bor: **mavzuni tanlash → o'qish va ko'rish → testni yechish**.
@@ -72,7 +73,7 @@ Resursga o'ting, mavzuni tanlang, materialni o'qib chiqing va mavzu oxiridagi te
   },
 
   'tibbiy-psixologiya-va-shaxslararo-muloqot': {
-    excerpt: "Hamshiralik ishi va Davolash ishi · I semestr · 2026–2027 o'quv yili · 60 soat",
+    excerpt: "Hamshiralik ishi, Davolash ishi · 2026–2027 o'quv yili · 20 mavzu · 60 soat",
     body: `## Resurs haqida
 
 "Tibbiy psixologiya va shaxslararo muloqot" fani bo'yicha raqamli ta'lim resursi. Har bir mavzu plakatlar (ko'rgazmali materiallar) bilan boyitilgan, o'zlashtirish darajasi avtomatik hisoblanadi. Resursda ikki yo'nalish uchun alohida dastur bor.
@@ -102,7 +103,7 @@ Resursga o'ting, sahifa yuqorisida o'z yo'nalishingizni (Hamshiralik ishi yoki D
   },
 
   'kasbiy-faoliyatning-huquqiy-asoslari-va-bioetika': {
-    excerpt: "Davolash ishi, Farmatsiya, Tibbiy profilaktika · I semestr · 2026–2027 o'quv yili",
+    excerpt: "Davolash ishi, Farmatsiya, Tibbiy profilaktika · 2026–2027 o'quv yili · 20–24 mavzu · 64–72 soat",
     body: `## Resurs haqida
 
 "Kasbiy faoliyatning huquqiy asoslari va Bioetika" fani bo'yicha raqamli ta'lim resursi. Mavzular plakatlar bilan ko'rsatilgan, o'zlashtirish darajasi avtomatik hisoblanadi. Uch yo'nalish uchun alohida dastur bor.
@@ -134,7 +135,7 @@ Resursga o'ting, sahifa yuqorisida o'z yo'nalishingizni tanlang. Mavzular ro'yxa
   },
 
   'inson-hayoti-davomida-rivojlanishi': {
-    excerpt: "Pearson BTEC · 1-modul · 2026–2027 o'quv yili · 20 dars · 60 soat",
+    excerpt: "Pearson BTEC · 2026–2027 o'quv yili · 20 mavzu · 60 soat",
     body: `## Resurs haqida
 
 Pearson BTEC "Sog'liqni saqlash va ijtimoiy parvarish" dasturining **1-moduli: Inson hayoti davomida rivojlanishi** bo'yicha interaktiv raqamli ta'lim resursi. Darslarda interaktiv mashqlar bor, modul ichida ikkita baholash topshirig'i (1.1 va 1.2) mavjud.
